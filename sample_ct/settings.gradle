@@ -1,0 +1,2 @@
+include ':app', ':ntbase-release'
+rootProject.name='sample'

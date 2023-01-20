@@ -1,0 +1,49 @@
+<resources>
+    <string name="app_name">sample</string>
+    <string name="adjustinit">AdjustInit</string>
+    <string name="adjustevent1">adjustevent1</string>
+    <string name="adjustevent2">adjustevent2</string>
+    <string name="adjustadid">adjustadid</string>
+    <string name="android_id">android_id</string>
+    <string name="jni">JNI</string>
+    <string name="facebookInit">facebookInit</string>
+    <string name="faceLogin">faceLogin</string>
+    <string name="faceLogout">faceLogout</string>
+    <string name="FrinedList">FrinedList</string>
+    <string name="etc">etc</string>
+    <string name="LineInit">LineInit</string>
+    <string name="LineLogin">LineLogin</string>
+    <string name="LineLogout">LineLogout</string>
+    <string name="LineProfile">LineProfile</string>
+    <string name="LineVerify">LineVerify</string>
+    <string name="LineRefresh">LineRefresh</string>
+    <string name="PurchaseConnect">PurchaseConnect</string>
+    <string name="PurchaseBuyPurchase">PurchaseBuyPurchase</string>
+    <string name="PurchaseBuyPurchaseSub">PurchaseBuyPurchaseSub</string>
+    <string name="PurchaseGetProudctList">PurchaseGetProudctList</string>
+    <string name="PurchaseConsume">PurchaseConsume</string>
+    <string name="PurchaseConsumeAll">PurchaseConsumeAll</string>
+    <string name="PurchaseProductRestore">PurchaseProductRestore</string>
+    <string name="PurchaseHistory">PurchaseHistory</string>
+    <string name="PurchaseGalaxyConnect">PurchaseGalaxyConnect</string>
+    <string name="PurchaseGalaxyBuyPurchase">PurchaseGalaxyBuyPurchase</string>
+    <string name="PurchaseGalaxyGetProudctList">PurchaseGalaxyGetProudctList</string>
+    <string name="PurchaseGalaxyConsume">PurchaseGalaxyConsume</string>
+    <string name="PurchaseGalaxyConsumeAll">PurchaseGalaxyConsumeAll</string>
+    <string name="PurchaseGalaxyProductRestore">PurchaseGalaxyProductRestore</string>
+    <string name="PurchaseGalaxyHistory">PurchaseGalaxyHistory</string>
+    <string name="gps_adid">GPS_ADID</string>
+    <string name="filter_view_http_gizmos">filter_view_http_gizmos</string>
+    <string name="filter_view_example_gizmos">filter_view_example_gizmos</string>
+    <string name="fb_login_protocol_scheme">fb3026956984044545</string>
+    <string name="AndroidPermlission">AndroidPermlission</string>
+    <string name="BacktraceInit">BacktraceInit</string>
+    <string name="BacktraceCrash1">BacktraceCrash1</string>
+    <string name="BacktraceCrash2">BacktraceCrash2</string>
+
+
+
+
+    <!--com.linegames.samples-->
+    <!--<string name="fb_login_protocol_scheme">fb183085325620769</string>-->
+</resources>
