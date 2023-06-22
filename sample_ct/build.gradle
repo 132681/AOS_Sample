@@ -23,7 +23,8 @@ allprojects {
         google()
         jcenter()
         flatDir {
-            dirs = ['D:/Project/SyncPay/Plugins/NTSDK/NTBase/Source/ThirdParty/Release_1.0.1/lib/Android', 'D:\\Project\\SyncPay\\Plugins\\NTSDK\\NTUMG\\Source\\ThirdParty\\Android']
+//            dirs = ['D:/Project/SyncPay/Plugins/NTSDK/NTBase/Source/ThirdParty/Release_1.0.1/lib/Android', 'D:\\Project\\SyncPay\\Plugins\\NTSDK\\NTUMG\\Source\\ThirdParty\\Android']
+            dirs = ['D:/Project/SyncPay/Plugins/NTSDK/NTBase/Source/ThirdParty/Release_1.0.1/lib/Android']
         }
     }
 }

@@ -13,11 +13,11 @@ android {
 //            keyAlias = 'linegames'
 //        }
     }
-    compileSdkVersion 32
+    compileSdkVersion 33
     defaultConfig {
         applicationId 'com.linegames.ct2'
         minSdkVersion 23
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -73,6 +73,7 @@ dependencies {
     //implementation 'com.linecorp.linesdk:linesdk:5.5.1'    //line
     implementation 'com.linecorp.linesdk:linesdk:5.3.1'    //line
     implementation(name: 'ntbase-release', ext: 'aar')
+//    implementation(name: 'ntpermission-notice-release', ext: 'aar')
     implementation 'com.android.billingclient:billing:5.1.0' //google billing
 //    implementation 'com.android.billingclient:billing-ktx:2.2.0' //google billing
 

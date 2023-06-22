@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,6 +25,7 @@ import com.linegames.PurchaseGalaxy;
 import com.linegames.auth.Facebook;
 import com.linegames.base.NTBase;
 import com.linegames.base.NTLog;
+import com.linegames.UMG;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,6 +66,9 @@ public class MainActivity extends Activity
         Log.d(TAG, "stringFromJNI : " + stringFromJNI());
 
         NTBase.getInstance().onCreate( this );
+
+        int targetSdkVersion = getApplicationContext().getApplicationInfo().targetSdkVersion;
+        Log.d(TAG, "targetSdkVersion : " + targetSdkVersion);
 
         Button btn1 = (Button) this.findViewById(R.id.button1);
         btn1.setOnClickListener(new View.OnClickListener() {
@@ -458,8 +463,14 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "BacktraceInit");
-//                NTBacktrace.Companion.InitBacktrace();
+                Log.d(TAG, "PermissionView");
+
+                String[] permissionTitle = new String[]{"Kim","Lee","Park"};
+                String[] permissionDesc = new String[]{"Desc1","Desc2","Desc3"};
+                String[] permissionType = new String[]{"Type1","Type2","Type3"};
+                Log.d(TAG, "PermissionView 2");
+                UMG.Companion.ShowApplicationPermission(permissionTitle,permissionDesc,permissionType,111);
+
             }
         });
 
@@ -491,6 +502,7 @@ public class MainActivity extends Activity
                 Log.d(TAG, "LoadData : " + LoadData);
             }
         });
+
     }
 
     public void testFunc()
