@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -25,7 +26,7 @@ import com.linegames.PurchaseGalaxy;
 import com.linegames.auth.Facebook;
 import com.linegames.base.NTBase;
 import com.linegames.base.NTLog;
-import com.linegames.UMG;
+import com.linegames.DFPurchase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,6 +34,7 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 public class MainActivity extends Activity
@@ -75,7 +77,7 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "adjustinit");
-                //NTAdjust.Companion.Init("kz6rk49tznr4", "", "sandbox",1,665017812,845755228,363896731,1903830666);
+                NTAdjust.Companion.Init("kz6rk49tznr4", "", "sandbox",1,665017812,845755228,363896731,1903830666);
                // testFunc();
             }
         });
@@ -448,13 +450,18 @@ public class MainActivity extends Activity
 
         Button btn31 = (Button) this.findViewById(R.id.button31);
         btn31.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.S)
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "Android Permission 12");
+                int targetSdkVersion = getApplicationContext().getApplicationInfo().targetSdkVersion;
+                int minSdkVersion = getApplicationContext().getApplicationInfo().minSdkVersion;
+                Log.d(TAG, "Android targetSdkVersion : " + targetSdkVersion);
+                Log.d(TAG, "Android minSdkVersion : " + minSdkVersion);
+
                 AndroidPermission.GetInstance().ShowRequestPermission();
 
-                Log.d(TAG, "Android Permission 13");
+                Log.d(TAG, "AndroidPermission.GetInstance().ShowRequestPermission()");
             }
         });
 
@@ -463,13 +470,15 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "PermissionView");
+                Log.d(TAG, "ShowApplicationPermission");
 
-                String[] permissionTitle = new String[]{"Kim","Lee","Park"};
-                String[] permissionDesc = new String[]{"Desc1","Desc2","Desc3"};
-                String[] permissionType = new String[]{"Type1","Type2","Type3"};
-                Log.d(TAG, "PermissionView 2");
-                UMG.Companion.ShowApplicationPermission(permissionTitle,permissionDesc,permissionType,111);
+                AndroidPermission.GetInstance().ExternalStorage_Write();
+
+//                String[] permissionTitle = new String[]{"알림"};
+//                String[] permissionDesc = new String[]{"앱에서 보내는 알림을 수신합니다."};
+//                String[] permissionType = new String[]{"선택"};
+//                Log.d(TAG, "PermissionView 2");
+//                UMG.Companion.ShowApplicationPermission(permissionTitle,permissionDesc,permissionType,111);
 
             }
         });
@@ -495,11 +504,91 @@ public class MainActivity extends Activity
             public void onClick(View view)
             {
                 Log.d(TAG, "BacktraceCrash2");
- //               NTBacktrace.Companion.BacktraceCrash2();
+                //               NTBacktrace.Companion.BacktraceCrash2();
                 //read
                 SharedPreferences sharedPref = NTBase.getMainActivity ().getPreferences(Context.MODE_PRIVATE);
                 String LoadData = sharedPref.getString("aoskeyt", "");
                 Log.d(TAG, "LoadData : " + LoadData);
+            }
+        });
+
+        Button btn36 = (Button) this.findViewById(R.id.button36);
+        btn36.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                Log.d(TAG, "AndridPopupWindow");
+            }
+        });
+
+        Button btn37 = (Button) this.findViewById(R.id.button37);
+        btn37.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                Log.d(TAG, "DF_Connect");
+                DFPurchase.Connect();
+            }
+        });
+
+        Button btn38 = (Button) this.findViewById(R.id.button38);
+        btn38.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                Log.d(TAG, "DF_RefreshProduct");
+//                DFPurchase.registerStoreProductID("df_for_kakao_google_play_22_03");
+//                DFPurchase.registerStoreProductID("df_for_kakao_google_play_20_14");
+                DFPurchase.registerStoreProductID("cointop2_google_play_gem300");
+                DFPurchase.registerStoreProductID("cointop2_google_play_gem500");
+                DFPurchase.refreshStoreProductInfo();
+            }
+        });
+
+        Button btn39 = (Button) this.findViewById(R.id.button39);
+        btn39.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                Log.d(TAG, "DF_Purchase");
+                DFPurchase.requestPurchaseToGooglePlay("cointop2_google_play_gem300");
+            }
+        });
+
+        Button btn40 = (Button) this.findViewById(R.id.button40);
+        btn40.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                Log.d(TAG, "DF_Consume");
+                DFPurchase.IAP_RemoveReceipt();
+            }
+        });
+
+        Button btn41 = (Button) this.findViewById(R.id.button41);
+        btn41.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                Log.d(TAG, "DF_Test1");
+                DFPurchase.LoadRestoreInfo();
+            }
+        });
+
+        Button btn42 = (Button) this.findViewById(R.id.button42);
+        btn42.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                Log.d(TAG, "DF_Test2");
+                try {
+                    Log.d(TAG, "IAP_GetSignature : " + DFPurchase.IAP_GetProductName());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Log.d(TAG, "IAP_GetSignature : " + DFPurchase.IAP_GetSignature());
+                Log.d(TAG, "IAP_GetPurchaseData : " + DFPurchase.IAP_GetPurchaseData());
+                Log.d(TAG, "IAP_IsExistReceipt : " + DFPurchase.IAP_IsExistReceipt());
             }
         });
 

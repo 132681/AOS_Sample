@@ -40,9 +40,13 @@
     <string name="BacktraceInit">BacktraceInit</string>
     <string name="BacktraceCrash1">BacktraceCrash1</string>
     <string name="BacktraceCrash2">BacktraceCrash2</string>
-
-
-
+    <string name="AndridPopupWindow">AndridPopupWindow</string>
+    <string name="DF_Connect">DF_Connect</string>
+    <string name="DF_RefreshProduct">DF_RefreshProduct</string>
+    <string name="DF_Purchase">DF_Purchase</string>
+    <string name="DF_Consume">DF_Consume</string>
+    <string name="DF_Test1">DF_Test1</string>
+    <string name="DF_Test2">DF_Test2</string>
 
     <!--com.linegames.samples-->
     <!--<string name="fb_login_protocol_scheme">fb183085325620769</string>-->
