@@ -2,7 +2,10 @@ package com.linegames;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
+
 import androidx.annotation.Nullable;
 
 import com.android.billingclient.api.ProductDetails;
@@ -23,6 +26,7 @@ import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.linegames.base.NTBase;
+import com.linegames.ct2.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -50,6 +54,11 @@ public class Purchase implements PurchasesUpdatedListener
     private static List<ProductDetails> mProductDetailsList;
     private static List<com.android.billingclient.api.Purchase> mPurchases;
     private static HashMap<String, ProductDetails> mProductDetailsListMap;
+
+    private static JSONArray email_productsJsonArray = new JSONArray();
+    private static String email_receipt = "_SUCCESS";
+
+    private static String email_signature = "NT_SUCCESS";
 
     private static Purchase getInstance = null;
     public native void nativeCB( String status, String msg, long userCB );
@@ -196,8 +205,8 @@ public class Purchase implements PurchasesUpdatedListener
             for (String pid : productsInfo) {
                 productsInfoParams.add(QueryProductDetailsParams.Product.newBuilder()
                         .setProductId(pid)
-                        .setProductType(BillingClient.ProductType.SUBS)
-//                        .setProductType(BillingClient.ProductType.INAPP)
+//                        .setProductType(BillingClient.ProductType.SUBS)
+                        .setProductType(BillingClient.ProductType.INAPP)
                         .build());
             }
 
@@ -336,7 +345,7 @@ public class Purchase implements PurchasesUpdatedListener
                         result_msg = "ProductID does no match. Please Check productID ( " + productID + " ) ";
                         NTLog.d(result_msg);
                         GetInstance().Invoke( "UNKNOWN", new JSONArray(), result_msg, result_ResponseCode , userCB );
-                        //return;
+                        return;
                     }
 
                     ImmutableList<BillingFlowParams.ProductDetailsParams> productDetailsParamsList =
@@ -395,7 +404,8 @@ public class Purchase implements PurchasesUpdatedListener
                                     .put("developerPayload", product.getDeveloperPayload() )
                                     .put("signature", product.getSignature() )
                             );
-
+                            email_receipt = product.getOriginalJson();
+                            email_signature = product.getSignature();
                             result_status = "NT_SUCCESS";
                             if(product.getPurchaseState() == com.android.billingclient.api.Purchase.PurchaseState.PENDING)
                             {
@@ -412,6 +422,9 @@ public class Purchase implements PurchasesUpdatedListener
                                 }
                             }
                         }
+
+//                        sendEmailToAdmin();
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         result_msg = e.getMessage();
@@ -461,8 +474,22 @@ public class Purchase implements PurchasesUpdatedListener
         GetInstance().Invoke( result_status, productsJsonArray, result_msg, billingResult.getResponseCode() , purchaseCB );
     }
 
+    public static void sendEmailToAdmin() throws JSONException {
+        String title = "Receipt";
+//        String[] receivers = new String[]{"god0@line.games"};
+        String[] receivers = null;
+        Intent email = new Intent(Intent.ACTION_SEND);
+        email.putExtra(Intent.EXTRA_SUBJECT, title);
+        email.putExtra(Intent.EXTRA_EMAIL, receivers);
+        email.putExtra(Intent.EXTRA_TEXT, String.format("receipt : %s signature : %s ", email_receipt, email_signature ));
+        email.setType("message/rfc822");
+        NTBase.getMainActivity().startActivity(email);
+    }
+
     public static void Consume( final String productID, final long userCB ) throws JSONException {
         NTLog.d(" Consume() productID : " + productID );
+
+
         if ( !CheckInitlized( userCB ) ) return;
 
         if ( productID.isEmpty() )
