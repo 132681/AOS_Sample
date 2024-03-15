@@ -47,7 +47,7 @@
     <string name="DF_Consume">DF_Consume</string>
     <string name="DF_Test1">DF_Test1</string>
     <string name="DF_Test2">DF_Test2</string>
-
+    <string name="app_id">764920947053</string>
     <!--com.linegames.samples-->
     <!--<string name="fb_login_protocol_scheme">fb183085325620769</string>-->
 </resources>

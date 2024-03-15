@@ -6,12 +6,12 @@ apply plugin: 'kotlin-android'
 
 android {
     signingConfigs {
-//        signingAPK {
-//            storeFile file('C:\\Users\\LG\\KeyStore\\ntsdksample.keystore')
-//            storePassword 'zhdlsxkq1!'
-//            keyPassword 'zhdlsxkq1!'
-//            keyAlias = 'linegames'
-//        }
+        signingAPK {
+            storeFile file('D:\\Git\\Unity\\cointop\\cointop\\ct.jks')
+            storePassword 'zhdlsxkq1!'
+            keyPassword 'zhdlsxkq1!'
+            keyAlias = 'linegames'
+        }
     }
     compileSdkVersion 33
     defaultConfig {
@@ -27,6 +27,8 @@ android {
                 cppFlags ""
             }
         }
+        ndk.abiFilters 'armeabi-v7a','arm64-v8a','x86','x86_64'
+
     }
     buildTypes {
         release {
@@ -34,9 +36,11 @@ android {
             debuggable true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             //kotlinFieCopy kotlinFieCopy.release
+            signingConfig signingConfigs.signingAPK
         }
         debug {
             debuggable true
+            signingConfig signingConfigs.signingAPK
         }
     }
     externalNativeBuild {
@@ -83,6 +87,10 @@ dependencies {
     implementation 'com.github.backtrace-labs.backtrace-android:backtrace-library:3.3.0'
     implementation 'androidx.ads:ads-identifier:1.0.0-alpha01'
     implementation 'com.google.guava:guava:28.0-android'
+
+    implementation 'com.google.android.gms:play-services-auth:16.0.0'//google play service test
+    implementation 'com.google.android.gms:play-services-games:16.0.0'
+
 
     implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar'], exclude: []) //save object
 }

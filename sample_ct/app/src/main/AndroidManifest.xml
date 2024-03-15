@@ -57,6 +57,7 @@
 
         </activity>
         <!-- facebook start !-->
+        <meta-data android:name="com.google.android.gms.games.APP_ID" android:value="@string/app_id"/>
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="\u0033026956984044545" />
         <!--<meta-data android:name="com.facebook.sdk.ApplicationId" android:value="\u003183085325620769" />-->
         <activity android:name=".FacebookLoginActivity" android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation" ></activity>

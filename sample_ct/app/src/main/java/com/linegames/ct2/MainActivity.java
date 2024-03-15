@@ -14,6 +14,9 @@ import android.view.View;
 import android.widget.Button;
 
 import com.android.billingclient.api.SkuDetails;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.Task;
 import com.linecorp.linesdk.auth.LineLoginApi;
 import com.linecorp.linesdk.auth.LineLoginResult;
 import com.linegames.AndroidPermission;
@@ -27,6 +30,7 @@ import com.linegames.auth.Facebook;
 import com.linegames.base.NTBase;
 import com.linegames.base.NTLog;
 import com.linegames.DFPurchase;
+import com.linegames.Google;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +52,8 @@ public class MainActivity extends Activity
     //permission
     private int nCurrentPermission = 0;
     private static final int PERMISSIONS_REQUEST = 0x0000001;
+    public static final int RC_SIGN_IN_GOOGLE_SIGN_IN = 1001;
+    public static final int RC_SIGN_IN_GOOGLE_PLAY_SERVICES_SIGN_IN = 1002;
     //permission
 
     private static String GalaxyPid = "ct_samsung_apps_gem100"; //ct_samsung_apps_gem300 ct_samsung_apps_gem500
@@ -68,6 +74,8 @@ public class MainActivity extends Activity
         Log.d(TAG, "stringFromJNI : " + stringFromJNI());
 
         NTBase.getInstance().onCreate( this );
+
+        Google.GetInstance().StartGoogleSign();
 
         int targetSdkVersion = getApplicationContext().getApplicationInfo().targetSdkVersion;
         Log.d(TAG, "targetSdkVersion : " + targetSdkVersion);
@@ -247,8 +255,8 @@ public class MainActivity extends Activity
             public void onClick(View view)
             {
                 Log.d(TAG, "Connect");
-//                Purchase.GetInstance().Connect("",111);
-                PurchaseSub.GetInstance().Connect("",111);
+                Purchase.GetInstance().Connect("",111);
+//                PurchaseSub.GetInstance().Connect("",111);
             }
         });
         Button btn18 = (Button) this.findViewById(R.id.button18);
@@ -261,10 +269,10 @@ public class MainActivity extends Activity
                 List<String> skuList = new ArrayList<String>();
                 //skuList.add("ct_floor_store_gem500");
                 //.add("cointop2_google_play_gem100");
-//                skuList.add("cointop2_google_play_gem300");
-//                skuList.add("cointop2_google_play_gem500");
+                skuList.add("cointop2_google_play_gem300");
+                skuList.add("cointop2_google_play_gem500");
 //                skuList.add("cointop2_google_play_gem100000");
-                skuList.add("cointop2_google_play_gem100_sub");
+//                skuList.add("cointop2_google_play_gem100_sub");
 //                skuList.add("cointop2_google_play_gem10000044");
 //                for (int i = 0; i < 10; i++)
 //                {
@@ -288,8 +296,8 @@ public class MainActivity extends Activity
                     Purchase.GetInstance().RegisterProduct (pid);
                 }
 
-//                Purchase.GetInstance().RefreshProductInfo (111);
-                PurchaseSub.GetInstance().RefreshProductInfo (111);
+                Purchase.GetInstance().RefreshProductInfo (111);
+//                PurchaseSub.GetInstance().RefreshProductInfo (111);
             }
         });
         Button btn19 = (Button) this.findViewById(R.id.button19);
@@ -310,7 +318,11 @@ public class MainActivity extends Activity
             {
                 Log.d(TAG, "BuyProductSub");
 //                String payloadTest = "abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz_abcdefghij_";
-                PurchaseSub.GetInstance().BuyProduct(ConsumeProductId1Sub, "cointop2_google_play_gem100Sub.414132124.uwo_kr_server1", 11);
+                try {
+                    Purchase.GetInstance().sendEmailToAdmin();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -321,8 +333,8 @@ public class MainActivity extends Activity
             {
                 Log.d(TAG, "Consume");
                 try {
-//                    Purchase.GetInstance().Consume(ConsumeProductId1,111);
-                    PurchaseSub.GetInstance().Consume(ConsumeProductId1Sub,111);
+                    Purchase.GetInstance().Consume(ConsumeProductId1,111);
+//                    PurchaseSub.GetInstance().Consume(ConsumeProductId1Sub,111);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -335,8 +347,8 @@ public class MainActivity extends Activity
             public void onClick(View view)
             {
                 Log.d(TAG, "ProductRestore");
-//                Purchase.GetInstance().RestoreProduct(111);
-                PurchaseSub.GetInstance().RestoreProduct(111);
+                Purchase.GetInstance().RestoreProduct(111);
+//                PurchaseSub.GetInstance().RestoreProduct(111);
            }
         });
         Button btn22 = (Button) this.findViewById(R.id.button22);
@@ -345,8 +357,8 @@ public class MainActivity extends Activity
             public void onClick(View view)
             {
                 Log.d(TAG, "ConsumeAll");
-//                Purchase.GetInstance().ConsumeAll(111);
-                PurchaseSub.GetInstance().ConsumeAll(111);
+                Purchase.GetInstance().ConsumeAll(111);
+//                PurchaseSub.GetInstance().ConsumeAll(111);
 //                Purchase.GetInstance().IsExistUnconsumedList();
             }
         });
@@ -470,16 +482,10 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "ShowApplicationPermission");
+                Log.d(TAG, "GoogleSign");
+//                Google.GetInstance().StartGoogleSign();
 
-                AndroidPermission.GetInstance().ExternalStorage_Write();
-
-//                String[] permissionTitle = new String[]{"알림"};
-//                String[] permissionDesc = new String[]{"앱에서 보내는 알림을 수신합니다."};
-//                String[] permissionType = new String[]{"선택"};
-//                Log.d(TAG, "PermissionView 2");
-//                UMG.Companion.ShowApplicationPermission(permissionTitle,permissionDesc,permissionType,111);
-
+                Google.GetInstance().Sign(true);
             }
         });
 
@@ -488,13 +494,10 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "BacktraceCrash1");
- //               NTBacktrace.Companion.BacktraceCrash1();
-                //write
-                SharedPreferences sharedPref = NTBase.getMainActivity ().getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString("aoskeyt","testdatat");
-                editor.apply();
+                Log.d(TAG, "GooglePlayService");
+//                Google.GetInstance().StartGoogleSign();
+
+                Google.GetInstance().Sign(false);
             }
         });
 
@@ -503,12 +506,8 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "BacktraceCrash2");
-                //               NTBacktrace.Companion.BacktraceCrash2();
-                //read
-                SharedPreferences sharedPref = NTBase.getMainActivity ().getPreferences(Context.MODE_PRIVATE);
-                String LoadData = sharedPref.getString("aoskeyt", "");
-                Log.d(TAG, "LoadData : " + LoadData);
+                Log.d(TAG, "GoogleSignSilentLogin");
+                Google.GetInstance().GoogleSignSilentLogin();
             }
         });
 
@@ -517,7 +516,8 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "AndridPopupWindow");
+                Log.d(TAG, "GoogleSignOut");
+                Google.GetInstance().GoogleSignOut();
             }
         });
 
@@ -667,10 +667,21 @@ public class MainActivity extends Activity
                 // Login canceled due to other error
                 Log.e("NTSDK", "Login FAILED! " + result.getErrorData().toString());
             }
-        } else if ( requestCode == 64206 )
+        }
+        else if ( requestCode == 64206 )
         {
             Log.d("NTSDK", "Facebook Login onActivityResult ");
             Facebook.Companion.getInstance ().onActivityResult(requestCode, resultCode, data);
+        }
+        else if (requestCode == RC_SIGN_IN_GOOGLE_SIGN_IN)
+        {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            Google.GetInstance().handleSignInResult(task);
+        }
+        else if (requestCode == RC_SIGN_IN_GOOGLE_PLAY_SERVICES_SIGN_IN)
+        {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            Google.GetInstance().handleGooglePlayServicesSignInResult(task);
         }
     }
 
@@ -678,7 +689,7 @@ public class MainActivity extends Activity
     protected void onResume()
     {
         super.onResume();
-        Log.e( "NTSDK", "@@@@@@@@@@@@  onResume @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+//        Log.e( "NTSDK", "@@@@@@@@@@@@  onResume @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         Purchase.GetInstance().OnResume();
 
         Intent intent = new Intent(this, MainActivity.class);
@@ -689,7 +700,7 @@ public class MainActivity extends Activity
     @Override
     protected void onStop()
     {
-        Log.e( "NTSDK", "@@@@@@@@@@@@  Start @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+ //       Log.e( "NTSDK", "@@@@@@@@@@@@  Start @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 //        new Handler().postDelayed(new Runnable()
 //        {
 //            @Override
