@@ -173,7 +173,8 @@ public class Google
                                         if ( task.isSuccessful() ) {
                                             // String displayName = task.getResult().getDisplayName();
                                             String m_sPlayerID = Objects.requireNonNull(task.getResult()).getPlayerId();
-                                            NTLog.d("lss m_sPlayerID: " + m_sPlayerID );
+                                            //NTLog.d("lss m_sPlayerID: " + m_sPlayerID );
+
                                         }
                                         else {
                                             Exception e = task.getException();
@@ -279,6 +280,11 @@ public class Google
            // Toast.makeText(this, "Signed in as: " + account.getEmail(), Toast.LENGTH_SHORT).show();
             NTLog.d("GoogleSignIn", "lss Signed in as: " + account.getEmail());
 
+            String userid = completedTask.getResult().getId();
+            String token = completedTask.getResult().getIdToken();
+            NTLog.d("","lss userid : " + userid );
+            NTLog.d("","lss token : " + token );
+
             // Get AccessToken
             String accessToken = account.getIdToken();
             NTLog.d("AccessToken", "lss Google Sign-In AccessToken: " + accessToken);
@@ -296,6 +302,13 @@ public class Google
             // Signed in successfully
             //Toast.makeText(this, "Signed in to Google Play Services as: " + account.getEmail(), Toast.LENGTH_SHORT).show();
             NTLog.d("GooglePlayServicesSignIn", "lss Signed in as: " + account.getEmail());
+
+            String userid = completedTask.getResult().getId();
+            String token = completedTask.getResult().getIdToken();
+            NTLog.d("","lss userid : " + userid );
+            NTLog.d("","lss token : " + token );
+
+            Games.getGamesClient(NTBase.getMainActivity(), completedTask.getResult()).setViewForPopups( mMainActivity.getWindow().getDecorView() );
 
             String accessToken = account.getIdToken();
             // Get AccessToken
