@@ -34,6 +34,7 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Tasks;
 import com.linegames.base.NTLog;
 
 
@@ -58,8 +59,8 @@ import com.google.android.gms.drive.Drive;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
-import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.Objects;
 
 public class Google extends Activity
 {
@@ -380,18 +381,26 @@ public class Google extends Activity
     private static final String TEST_STRING = "This is a test string.";
     public Task<SnapshotMetadata> writeSnapshot(String sSaveName, String sSaveData, String sDesc) {
 
-        // Convert string to byte array
-        byte[] byteData = sSaveData.getBytes(StandardCharsets.UTF_8);
+        if (sSaveName == null) {
+            NTLog.d("", "sSaveName is null");
+            return Tasks.forResult(null);
+        }
+
+        byte[] byteData = null;
+        if (sSaveData != null) {
+            byteData = sSaveData.getBytes(StandardCharsets.UTF_8);
+        } else {
+            NTLog.d("", "sSaveData is null");
+            return Tasks.forResult(null);
+        }
 
         SnapshotsClient snapshotsClient = PlayGames.getSnapshotsClient(NTBase.getMainActivity());
         int conflictResolutionPolicy = SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED;
 
-        // Open the saved game using its name.
         return snapshotsClient.open(sSaveName, true, conflictResolutionPolicy)
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        // Handle failure to open snapshot
                         NTLog.d("" , e.toString());
                     }
                 })
@@ -401,23 +410,32 @@ public class Google extends Activity
                         Snapshot snapshot = task.getResult().getData();
                         SnapshotContents snapshotContents = snapshot.getSnapshotContents();
 
-                        // Write the data to the snapshot contents
-                        snapshotContents.writeBytes(byteData);
+                        if (snapshotContents != null) {
+                            snapshotContents.writeBytes(byteData);
+                        }
 
-                        // Commit and close the snapshot
                         SnapshotMetadataChange metadataChange = new SnapshotMetadataChange.Builder()
-//                                .setDescription("Saved game at " + System.currentTimeMillis()) // Example description
                                 .setDescription(sDesc) // Example description
                                 .build();
-                        return snapshotsClient.commitAndClose(snapshot, metadataChange);
+
+                        if (snapshot != null) {
+                            return snapshotsClient.commitAndClose(snapshot, metadataChange);
+                        } else {
+                            // Return a completed task with null result if snapshot is null
+                            return Tasks.forResult(null);
+                        }
                     }
                 });
     }
 
     public Task<String> loadSnapshot(String sLoadSaveName) {
 
-        SnapshotsClient snapshotsClient = PlayGames.getSnapshotsClient(NTBase.getMainActivity());
+        if (sLoadSaveName == null) {
+            Log.e("", "sLoadSaveName is null");
+            return Tasks.forResult("");
+        }
 
+        SnapshotsClient snapshotsClient = PlayGames.getSnapshotsClient(NTBase.getMainActivity());
         int conflictResolutionPolicy = SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED;
         return snapshotsClient.open(sLoadSaveName, true, conflictResolutionPolicy)
                 .addOnFailureListener(new OnFailureListener() {
@@ -430,11 +448,13 @@ public class Google extends Activity
                     public String then(@NonNull Task<SnapshotsClient.DataOrConflict<Snapshot>> task) throws Exception {
                         Snapshot snapshot = task.getResult().getData();
 
-                        // Opening the snapshot was a success and any conflicts have been resolved.
                         try {
-                            // Extract the raw data from the snapshot and convert it back to string
                             byte[] rawData = snapshot.getSnapshotContents().readFully();
-                            return new String(rawData, StandardCharsets.UTF_8);
+                            if (rawData != null) {
+                                return new String(rawData, StandardCharsets.UTF_8);
+                            } else {
+                                return "";
+                            }
                         } catch (IOException e) {
                             Log.e("", "Error while reading Snapshot.", e);
                         }
@@ -443,8 +463,6 @@ public class Google extends Activity
                 }).addOnCompleteListener(new OnCompleteListener<String>() {
                     @Override
                     public void onComplete(@NonNull Task<String> task) {
-                        // Dismiss progress dialog and reflect the changes in the UI when complete.
-                        // ...
                     }
                 });
     }
