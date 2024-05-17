@@ -16,6 +16,9 @@ import android.widget.Button;
 import com.android.billingclient.api.SkuDetails;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.games.SnapshotsClient;
+import com.google.android.gms.games.snapshot.SnapshotMetadata;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.linecorp.linesdk.auth.LineLoginApi;
 import com.linecorp.linesdk.auth.LineLoginResult;
@@ -35,20 +38,25 @@ import com.linegames.Google;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 public class MainActivity extends Activity
 {
     private static final String TAG = "NTSDK";
-    public static String ConsumeProductId1 = "cointop2_google_play_gem300";
+    public static String ConsumeProductId1 = "cointop2_google_play_gem100";
+//    public static String ConsumeProductId1 = "cointop2_google_play_gem300";
     public static String ConsumeProductId1Sub = "cointop2_google_play_gem100_sub";
     public static String ConsumeProductId2 = "cointop2_google_play_gem500";
     public static String ConsumeProductId3 = "cointop2_google_play_gem100000";
-
+    private static final int RC_SAVED_GAMES = 9009;
     //permission
     private int nCurrentPermission = 0;
     private static final int PERMISSIONS_REQUEST = 0x0000001;
@@ -75,7 +83,7 @@ public class MainActivity extends Activity
 
         NTBase.getInstance().onCreate( this );
 
-        Google.GetInstance().StartGoogleSign();
+//        Google.GetInstance().StartGoogleSign();
 
         int targetSdkVersion = getApplicationContext().getApplicationInfo().targetSdkVersion;
         Log.d(TAG, "targetSdkVersion : " + targetSdkVersion);
@@ -268,7 +276,8 @@ public class MainActivity extends Activity
 
                 List<String> skuList = new ArrayList<String>();
                 //skuList.add("ct_floor_store_gem500");
-                //.add("cointop2_google_play_gem100");
+                     //        cointop2_google_play_gem300
+                skuList.add("cointop2_google_play_gem100");
                 skuList.add("cointop2_google_play_gem300");
                 skuList.add("cointop2_google_play_gem500");
 //                skuList.add("cointop2_google_play_gem100000");
@@ -483,9 +492,8 @@ public class MainActivity extends Activity
             public void onClick(View view)
             {
                 Log.d(TAG, "GoogleSign");
-//                Google.GetInstance().StartGoogleSign();
-
-                Google.GetInstance().Sign(true);
+                Google.GetInstance().GooglePlayServiceSign();
+                Log.d(TAG, "Google.GetInstance().GooglePlayServiceSign()========================");
             }
         });
 
@@ -494,20 +502,38 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "GooglePlayService");
-//                Google.GetInstance().StartGoogleSign();
-
-                Google.GetInstance().Sign(false);
+                Log.d(TAG, "Google.GetInstance().signInSilently()========================");
+                Google.GetInstance().signInSilently();
             }
         });
 
+        String SAVE_GAMENAME_1 = "SaveGame1";
+        String SAVE_GAMENAME_2 = "SaveGame2";
         Button btn34 = (Button) this.findViewById(R.id.button34);
         btn34.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "GoogleSignSilentLogin");
-                Google.GetInstance().GoogleSignSilentLogin();
+                Log.d(TAG, "Google.GetInstance().writeSnapshot()========================");
+
+                String gameData = "Your game data string"; // 저장할 게임 데이터
+                Google.GetInstance().writeSnapshot(SAVE_GAMENAME_1, gameData, SAVE_GAMENAME_1)
+                        .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
+                            @Override
+                            public void onComplete(@NonNull Task<SnapshotMetadata> task) {
+                                if (task.isSuccessful()) {
+                                    // 게임 콘텐츠가 성공적으로 저장되었을 때의 처리
+                                    // 예를 들어, 사용자에게 저장 완료 메시지를 표시하거나 UI를 업데이트할 수 있습니다.
+                                    NTLog.d("","lss Google.GetInstance().writeSnapshot Success : " + task.toString());
+                                } else {
+                                    // 저장이 실패한 경우 처리
+                                    Exception e = task.getException();
+                                    NTLog.d("","lss Google.GetInstance().writeSnapshot Error : " + e.toString());
+                                    // 에러 메시지를 표시하거나 적절한 오류 처리를 수행합니다.
+                                }
+                            }
+                        });
+
             }
         });
 
@@ -516,8 +542,23 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "GoogleSignOut");
-                Google.GetInstance().GoogleSignOut();
+                Log.d(TAG, "Google.GetInstance().loadSnapshot()========================");
+                Google.GetInstance().loadSnapshot(SAVE_GAMENAME_1).addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (task.isSuccessful()) {
+                            // 작업이 성공적으로 완료됐을 때
+                            String snapshotData = task.getResult();
+                            Log.d(TAG, "lss loadSnapshot : " + snapshotData);
+                            // snapshotData를 사용하여 필요한 작업을 수행합니다.
+                        } else {
+                            // 작업이 실패했을 때
+                            Exception e = task.getException();
+                            // 실패 이유를 처리합니다.
+                            Log.d(TAG, "lss loadSnapshot e : " + e.toString());
+                        }
+                    }
+                });
             }
         });
 
@@ -539,9 +580,9 @@ public class MainActivity extends Activity
                 Log.d(TAG, "DF_RefreshProduct");
 //                DFPurchase.registerStoreProductID("df_for_kakao_google_play_22_03");
 //                DFPurchase.registerStoreProductID("df_for_kakao_google_play_20_14");
-                DFPurchase.registerStoreProductID("cointop2_google_play_gem300");
-                DFPurchase.registerStoreProductID("cointop2_google_play_gem500");
-                DFPurchase.refreshStoreProductInfo();
+//                DFPurchase.registerStoreProductID("cointop2_google_play_gem300");
+//                DFPurchase.registerStoreProductID("cointop2_google_play_gem500");
+//                DFPurchase.refreshStoreProductInfo();
             }
         });
 
@@ -639,17 +680,17 @@ public class MainActivity extends Activity
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    protected void onActivityResult(int requestCode, int resultCode, Intent intentData)
     {
-        super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, intentData);
         Log.d( "NTSDK", "@@@@@@@@@@@@  onActivityResult @@@@@@@@@@@@@ " + " resultcode : " + requestCode  );
 
         if(requestCode == 0XFF)
         {
-            LineLoginResult result = LineLoginApi.getLoginResultFromIntent(data);
+            LineLoginResult result = LineLoginApi.getLoginResultFromIntent(intentData);
             Log.d( "NTSDK", "@@@@@@@@@@@@" + " result.getResponseCode() : " + result.getResponseCode() );
 
-            Line.Companion.LineOnActivityResult( requestCode, resultCode, data );
+            Line.Companion.LineOnActivityResult( requestCode, resultCode, intentData );
 
             switch (result.getResponseCode()) {
             case SUCCESS:
@@ -671,19 +712,68 @@ public class MainActivity extends Activity
         else if ( requestCode == 64206 )
         {
             Log.d("NTSDK", "Facebook Login onActivityResult ");
-            Facebook.Companion.getInstance ().onActivityResult(requestCode, resultCode, data);
+            Facebook.Companion.getInstance ().onActivityResult(requestCode, resultCode, intentData);
         }
         else if (requestCode == RC_SIGN_IN_GOOGLE_SIGN_IN)
         {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intentData);
             Google.GetInstance().handleSignInResult(task);
         }
         else if (requestCode == RC_SIGN_IN_GOOGLE_PLAY_SERVICES_SIGN_IN)
         {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intentData);
             Google.GetInstance().handleGooglePlayServicesSignInResult(task);
         }
+        else if (requestCode == RC_SAVED_GAMES)
+        {
+            Log.d( "NTSDK", "@@@@@@@@@@@@  RC_SAVED_GAMES @@@@@@@@@@@@@ "  );
+            if (intentData != null) {
+                if (intentData.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)) {
+                    // Load a snapshot.
+                    SnapshotMetadata snapshotMetadata =
+                            intentData.getParcelableExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA);
+                    mCurrentSaveName = snapshotMetadata.getUniqueName();
+                    long lTime = snapshotMetadata.getPlayedTime();
+                    long lValue = snapshotMetadata.getProgressValue();
+                    Log.d( "NTSDK", "lss mCurrentSaveName : " + mCurrentSaveName );
+                    Log.d( "NTSDK", "lss lTime : " + lTime );
+                    Log.d( "NTSDK", "lss lValue : " + lValue );
+
+                    // Load the game data from the Snapshot
+                    // ...
+                } else if (intentData.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_NEW)) {
+                    // Create a new snapshot named with a unique string
+                    String unique = new BigInteger(281, new Random()).toString(13);
+                    mCurrentSaveName = "snapshotTemp-" + unique;
+
+                    // Create the new snapshot
+                    // ...
+                }
+            }
+        }
+
+        if (intentData != null) {
+            if (intentData.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)) {
+                // Load a snapshot.
+                SnapshotMetadata snapshotMetadata =
+                        intentData.getParcelableExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA);
+                mCurrentSaveName = snapshotMetadata.getUniqueName();
+                Log.d( "NTSDK", "@@@@@@@@@@@@  EXTRA_SNAPSHOT_METADATA @@@@@@@@@@@@@ "  );
+
+                // Load the game data from the Snapshot
+                // ...
+            } else if (intentData.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_NEW)) {
+                // Create a new snapshot named with a unique string
+                String unique = new BigInteger(281, new Random()).toString(13);
+                mCurrentSaveName = "snapshotTemp-" + unique;
+                Log.d( "NTSDK", "@@@@@@@@@@@@  EXTRA_SNAPSHOT_NEW @@@@@@@@@@@@@ "  );
+
+                // Create the new snapshot
+                // ...
+            }
+        }
     }
+    private String mCurrentSaveName = "snapshotTemp";
 
     @Override
     protected void onResume()
