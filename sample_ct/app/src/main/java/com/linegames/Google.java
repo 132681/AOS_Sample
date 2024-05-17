@@ -5,18 +5,35 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.facebook.FacebookException;
+import com.facebook.internal.WebDialog;
+import com.google.android.gms.games.AuthenticationResult;
 import com.google.android.gms.games.Games;
 //import com.google.android.gms.games.GamesSignInClient;
 //import com.google.android.gms.games.PlayGames;
-//import com.google.android.gms.games.PlayGamesSdk;
+import com.google.android.gms.games.GamesSignInClient;
+import com.google.android.gms.games.PlayGames;
+import com.google.android.gms.games.PlayGamesSdk;
 import com.google.android.gms.games.Player;
 import com.google.android.gms.games.PlayersClient;
+import com.google.android.gms.games.snapshot.Snapshot;
+import com.google.android.gms.games.SnapshotsClient;
+import com.google.android.gms.games.snapshot.SnapshotContents;
+import com.google.android.gms.games.snapshot.SnapshotMetadata;
+import com.google.android.gms.games.snapshot.SnapshotMetadataChange;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCanceledListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.linegames.base.NTLog;
 
 
@@ -32,11 +49,19 @@ import com.google.android.gms.tasks.Task;
 
 import com.linegames.base.NTBase;
 import com.linegames.ct2.MainActivity;
+import com.linegames.google.play.service.GoogleSignInActivity;
 
+//import com.google.android.gms.games.snapshot.SnapshotCoordinator;
+//import com.google.android.gms.games.snapshot.SnapshotsClient;
+import com.google.android.gms.drive.Drive;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
-public class Google
+public class Google extends Activity
 {
     private static String LOG_TAG = "NTSDK";
     private static String PURCHASE_TAG = "PurchaeAPI";
@@ -46,6 +71,9 @@ public class Google
     private static int result_ResponseCode = 0;
     private static long purchaseCB = 0L;
     private static long noCB = 777;
+
+    private static String webClientId = "764920947053-te91v114127brn1mdkolmuscn3iuugma.apps.googleusercontent.com";
+//    private static String webClientId = "764920947053-te91v114127brn1mdkolmuscn3iuugma.apps.googleusercontent.commm";
 
     public static GoogleSignInClient mGoogleSignInClient;
     public static GoogleSignInClient mGooglePlayServiceClient;
@@ -62,6 +90,7 @@ public class Google
                 if ( getInstance == null )
                     getInstance = new Google();
                     mMainActivity = NTBase.getMainActivity();
+                    //PlayGamesSdk.initialize(mMainActivity);
 
             }
         }
@@ -76,17 +105,10 @@ public class Google
                 .requestEmail()
                 .build();
 
-        GoogleSignInOptions gps = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
-                .requestId()
-                .requestEmail()
-                .build();
-
         if (mGoogleSignInClient == null)
             mMainActivity = NTBase.getMainActivity();
 
         mGoogleSignInClient = GoogleSignIn.getClient(mMainActivity, gs);
-
-        mGooglePlayServiceClient = GoogleSignIn.getClient(mMainActivity, gps);
 
         if (mGoogleSignInClient == null)
             NTLog.d("lss ================= mGoogleSignInClient is null ===================");
@@ -96,17 +118,21 @@ public class Google
 
     public void StartGooglePlayGamesSdk()
     {
-//        PlayGamesSdk.initialize(mMainActivity);
+        NTLog.d("lss ================= StartGooglePlayGamesSdk ===================");
+        PlayGamesSdk.initialize(mMainActivity);
     }
 
     public void Sign( boolean isGoogleSign )
     {
         if (isGoogleSign)
         {
+            Google.GetInstance().StartGoogleSign();
+
             GoogleSign();
         }
         else
         {
+           // StartGooglePlayGamesSdk();
             GooglePlayServiceSign();
         }
     }
@@ -114,16 +140,14 @@ public class Google
     public void GoogleSign()
     {
         NTLog.d("","lss GoogleSign");
-
-         mGoogleSignInClient.silentSignIn().addOnCompleteListener( mMainActivity,
-                new OnCompleteListener<GoogleSignInAccount>()
+        mGoogleSignInClient.silentSignIn().addOnCompleteListener( mMainActivity,new OnCompleteListener<GoogleSignInAccount>()
                 {
                     @Override
                     public void onComplete(@NonNull Task<GoogleSignInAccount> taskAuth )
                     {
                         if( taskAuth.isSuccessful() )
                         {
-                            NTLog.d("","lss Google: success" + taskAuth.getResult().toString() );
+                            NTLog.d("","lss Google: SilentSignIn success " + taskAuth.getResult().toString() );
                             String userid = taskAuth.getResult().getId();
                             String token = taskAuth.getResult().getIdToken();
                             NTLog.d("","lss userid : " + userid );
@@ -131,7 +155,8 @@ public class Google
                         }
                         else
                         {
-                            NTLog.d("","lss Google: signInSilently(): failure" );
+                            NTLog.d("","lss Google: SilentSignIn Fail" );
+
                             Intent signInIntent = mGoogleSignInClient.getSignInIntent();
                             mMainActivity.startActivityForResult(signInIntent, MainActivity.RC_SIGN_IN_GOOGLE_SIGN_IN);
                         }
@@ -144,60 +169,67 @@ public class Google
     {
         NTLog.d("","lss GooglePlayServiceSign");
 
-        mGooglePlayServiceClient.silentSignIn().addOnCompleteListener( mMainActivity,
-                new OnCompleteListener<GoogleSignInAccount>()
-                {
+        GamesSignInClient gamesSignInClient = PlayGames.getGamesSignInClient(mMainActivity);
+
+        gamesSignInClient.isAuthenticated().addOnCompleteListener(isAuthenticatedTask -> {
+
+            boolean isAuthenticated = (isAuthenticatedTask.isSuccessful() && isAuthenticatedTask.getResult().isAuthenticated());
+            if (isAuthenticated) {
+                // Continue with Play Games Services
+                NTLog.d("","lss GooglePlayServiceSign Continue with Play Games Services");
+                OnGooglePlayServiceResult(gamesSignInClient);
+
+            } else {
+                NTLog.d("","lss GooglePlayServiceSign.signIn() Not Logined");
+                gamesSignInClient.signIn().addOnCompleteListener(mMainActivity, new OnCompleteListener<AuthenticationResult>() {
                     @Override
-                    public void onComplete(@NonNull Task<GoogleSignInAccount> taskAuth )
-                    {
-                        if( taskAuth.isSuccessful() )
-                        {
-                            NTLog.d("","lss GooglePlayServiceSign: success" + taskAuth.getResult().toString() );
-                            String userid = taskAuth.getResult().getId();
-                            String token = taskAuth.getResult().getIdToken();
-                            NTLog.d("","lss userid : " + userid );
-                            NTLog.d("","lss token : " + token );
-
-                            if (userid == null)
+                    public void onComplete(@NonNull Task<AuthenticationResult> task) {
+                        gamesSignInClient.isAuthenticated().addOnCompleteListener(isAuthenticatedTask -> {
+                            if ( isAuthenticatedTask.isSuccessful() && isAuthenticatedTask.getResult().isAuthenticated() )
                             {
-                                NTLog.d("", "lss userid is null");
+                                NTLog.d("","lss Google Play Service Login success");
+                                OnGooglePlayServiceResult(gamesSignInClient);
                             }
-                            else {
-                                PlayersClient playersClient = Games.getPlayersClient( mMainActivity, taskAuth.getResult() );
-                                playersClient.getCurrentPlayer().addOnCompleteListener(new OnCompleteListener<Player>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Player> task) {
-
-                                        NTLog.d("lssplayersClient.getCurrentPlayer() isSuccessful(): " + task.isSuccessful() );
-
-                                        if ( task.isSuccessful() ) {
-                                            // String displayName = task.getResult().getDisplayName();
-                                            String m_sPlayerID = Objects.requireNonNull(task.getResult()).getPlayerId();
-                                            //NTLog.d("lss m_sPlayerID: " + m_sPlayerID );
-
-                                        }
-                                        else {
-                                            Exception e = task.getException();
-                                        }
-                                    }
-                                });
+                            else
+                            {
+                                NTLog.d("","lss Google Play Service Login Cancel");
                             }
-                        }
-                        else
-                        {
-                            NTLog.d("","lss GooglePlayServiceSign: failure" );
-                            Intent signInIntent = mGooglePlayServiceClient.getSignInIntent();
-                            mMainActivity.startActivityForResult(signInIntent, MainActivity.RC_SIGN_IN_GOOGLE_PLAY_SERVICES_SIGN_IN);
-                        }
+                        });
                     }
                 });
-
+                //                gamesSignInClient.signIn();
+            }
+        });
     }
 
+    public void OnGooglePlayServiceResult(GamesSignInClient gamesSignInClient)
+    {
+        gamesSignInClient.requestServerSideAccess(webClientId, /*forceRefreshToken=*/ false)
+                .addOnCompleteListener( task -> {
+                    if (task.isSuccessful())
+                    {
+                        PlayGames.getPlayersClient(mMainActivity).getCurrentPlayer().addOnCompleteListener(mTask -> {
+                            // Get PlayerID with mTask.getResult().getPlayerId()
+                            NTLog.d("","lss call GamesSignInClient.signIn()nnn");
+                            //NTLog.d("","lss Email : " +  task.getResult().);
+                            NTLog.d("","lss id : " +  "");
+                            NTLog.d("","lss displayName : " +  mTask.getResult().getDisplayName());
+                            NTLog.d("","lss idToken : " +  "");
+                            NTLog.d("","lss familyName : " +  "");
+                            NTLog.d("","lss givenName : " +  "");
+                            NTLog.d("","lss photoUrl : " +  mTask.getResult().getIconImageUri());
+                            NTLog.d("","lss getserverAuthCode : " +  task.getResult());
+                            NTLog.d("","lss playerId : " +  mTask.getResult().getPlayerId());
+                            NTLog.d("","lss mTask getResult : " +  mTask.getResult().toString());
+                        });
+                    } else {
+                        // Failed to retrieve authentication code.
+                        NTLog.d("","lss call requestServerSideAccess fail");
+                    }
+                });
+    }
     public void GoogleSignOut()
     {
-        NTLog.d("","lss GoogleSignOut");
-
         mGoogleSignInClient.signOut()
                 .addOnCompleteListener(mMainActivity, new OnCompleteListener<Void>() {
                     @Override
@@ -207,6 +239,7 @@ public class Google
                         NTLog.d("","lss GoogleSignOut : " + task.isSuccessful());
                     }
                 });
+
     }
 
     public void GooglePlayServiceSignOut()
@@ -283,11 +316,11 @@ public class Google
             String userid = completedTask.getResult().getId();
             String token = completedTask.getResult().getIdToken();
             NTLog.d("","lss userid : " + userid );
-            NTLog.d("","lss token : " + token );
+//            NTLog.d("","lss token : " + token );
 
             // Get AccessToken
-            String accessToken = account.getIdToken();
-            NTLog.d("AccessToken", "lss Google Sign-In AccessToken: " + accessToken);
+//            String accessToken = account.getIdToken();
+//            NTLog.d("AccessToken", "lss Google Sign-In AccessToken: " + accessToken);
 
         } catch (ApiException e) {
             // Sign in failed
@@ -306,13 +339,13 @@ public class Google
             String userid = completedTask.getResult().getId();
             String token = completedTask.getResult().getIdToken();
             NTLog.d("","lss userid : " + userid );
-            NTLog.d("","lss token : " + token );
+            //NTLog.d("","lss token : " + token );
 
-            Games.getGamesClient(NTBase.getMainActivity(), completedTask.getResult()).setViewForPopups( mMainActivity.getWindow().getDecorView() );
+//            Games.getGamesClient(NTBase.getMainActivity(), completedTask.getResult()).setViewForPopups( mMainActivity.getWindow().getDecorView() );
 
             String accessToken = account.getIdToken();
             // Get AccessToken
-            NTLog.d("AccessToken", "lss Google Play Services AccessToken: " + accessToken);
+            //NTLog.d("AccessToken", "lss Google Play Services AccessToken: " + accessToken);
 
             // Additional handling for Google Play Services sign-in
             // ...
@@ -323,4 +356,97 @@ public class Google
             //Toast.makeText(this, "Sign in to Google Play Services failed", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private static final int RC_SAVED_GAMES = 9009;
+    public void signInSilently()
+    {
+        SnapshotsClient snapshotsClient =
+                PlayGames.getSnapshotsClient(this);
+        int maxNumberOfSavedGamesToShow = 1;
+
+        Task<Intent> intentTask = snapshotsClient.getSelectSnapshotIntent(
+                "See My Saves", true, true, maxNumberOfSavedGamesToShow);
+
+        Log.d("", "lss signInSilently");
+        intentTask.addOnSuccessListener(new OnSuccessListener<Intent>() {
+            @Override
+            public void onSuccess(Intent intent) {
+                NTBase.getMainActivity().startActivityForResult(intent, RC_SAVED_GAMES);
+                Log.d("", "lss signInSilently onSuccess");
+            }
+        });
+    }
+
+    private static final String TEST_STRING = "This is a test string.";
+    public Task<SnapshotMetadata> writeSnapshot(String sSaveName, String sSaveData, String sDesc) {
+
+        // Convert string to byte array
+        byte[] byteData = sSaveData.getBytes(StandardCharsets.UTF_8);
+
+        SnapshotsClient snapshotsClient = PlayGames.getSnapshotsClient(NTBase.getMainActivity());
+        int conflictResolutionPolicy = SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED;
+
+        // Open the saved game using its name.
+        return snapshotsClient.open(sSaveName, true, conflictResolutionPolicy)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Handle failure to open snapshot
+                        NTLog.d("" , e.toString());
+                    }
+                })
+                .continueWithTask(new Continuation<SnapshotsClient.DataOrConflict<Snapshot>, Task<SnapshotMetadata>>() {
+                    @Override
+                    public Task<SnapshotMetadata> then(@NonNull Task<SnapshotsClient.DataOrConflict<Snapshot>> task) throws Exception {
+                        Snapshot snapshot = task.getResult().getData();
+                        SnapshotContents snapshotContents = snapshot.getSnapshotContents();
+
+                        // Write the data to the snapshot contents
+                        snapshotContents.writeBytes(byteData);
+
+                        // Commit and close the snapshot
+                        SnapshotMetadataChange metadataChange = new SnapshotMetadataChange.Builder()
+//                                .setDescription("Saved game at " + System.currentTimeMillis()) // Example description
+                                .setDescription(sDesc) // Example description
+                                .build();
+                        return snapshotsClient.commitAndClose(snapshot, metadataChange);
+                    }
+                });
+    }
+
+    public Task<String> loadSnapshot(String sLoadSaveName) {
+
+        SnapshotsClient snapshotsClient = PlayGames.getSnapshotsClient(NTBase.getMainActivity());
+
+        int conflictResolutionPolicy = SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED;
+        return snapshotsClient.open(sLoadSaveName, true, conflictResolutionPolicy)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                         Log.e("", "Error while opening Snapshot.", e);
+                    }
+                }).continueWith(new Continuation<SnapshotsClient.DataOrConflict<Snapshot>, String>() {
+                    @Override
+                    public String then(@NonNull Task<SnapshotsClient.DataOrConflict<Snapshot>> task) throws Exception {
+                        Snapshot snapshot = task.getResult().getData();
+
+                        // Opening the snapshot was a success and any conflicts have been resolved.
+                        try {
+                            // Extract the raw data from the snapshot and convert it back to string
+                            byte[] rawData = snapshot.getSnapshotContents().readFully();
+                            return new String(rawData, StandardCharsets.UTF_8);
+                        } catch (IOException e) {
+                            Log.e("", "Error while reading Snapshot.", e);
+                        }
+                        return null;
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        // Dismiss progress dialog and reflect the changes in the UI when complete.
+                        // ...
+                    }
+                });
+    }
+
 }
