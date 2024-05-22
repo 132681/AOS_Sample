@@ -236,25 +236,37 @@
                 android:id="@+id/button32"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/BacktraceInit" />
+                android:text="@string/GoogleSignin" />
 
             <Button
                 android:id="@+id/button33"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/BacktraceCrash1" />
+                android:text="@string/GooglePlayServiceSignin" />
 
             <Button
                 android:id="@+id/button34"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/BacktraceCrash2" />
+                android:text="@string/GoogleSignOut" />
+
+            <Button
+                android:id="@+id/button44"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/GoogleCloudList" />
+
+            <Button
+                android:id="@+id/button43"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/GoogleCloudSave" />
 
             <Button
                 android:id="@+id/button36"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/AndridPopupWindow" />
+                android:text="@string/GoogleCloudLoad" />
 
             <View
                 android:id="@+id/divider5"

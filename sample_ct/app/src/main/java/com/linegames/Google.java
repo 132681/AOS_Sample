@@ -2,17 +2,11 @@ package com.linegames;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.os.Build;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.facebook.FacebookException;
 import com.facebook.internal.WebDialog;
@@ -38,7 +32,6 @@ import com.google.android.gms.tasks.Tasks;
 import com.linegames.base.NTLog;
 
 
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -50,7 +43,6 @@ import com.google.android.gms.tasks.Task;
 
 import com.linegames.base.NTBase;
 import com.linegames.ct2.MainActivity;
-import com.linegames.google.play.service.GoogleSignInActivity;
 
 //import com.google.android.gms.games.snapshot.SnapshotCoordinator;
 //import com.google.android.gms.games.snapshot.SnapshotsClient;
@@ -58,9 +50,6 @@ import com.google.android.gms.drive.Drive;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
-import java.util.concurrent.Executor;
-import java.util.Objects;
 
 public class Google extends Activity
 {
@@ -386,7 +375,7 @@ public class Google extends Activity
             return Tasks.forResult(null);
         }
 
-        byte[] byteData = null;
+        final byte[] byteData;
         if (sSaveData != null) {
             byteData = sSaveData.getBytes(StandardCharsets.UTF_8);
         } else {
@@ -419,15 +408,21 @@ public class Google extends Activity
                                 .build();
 
                         if (snapshot != null) {
-                            return snapshotsClient.commitAndClose(snapshot, metadataChange);
+                            //return snapshotsClient.commitAndClose(snapshot, metadataChange);
+                            myToast = Toast.makeText(mMainActivity,"GoogleCloud Save Success : " + sSaveData , Toast.LENGTH_SHORT);
+
                         } else {
                             // Return a completed task with null result if snapshot is null
-                            return Tasks.forResult(null);
+                            //return Tasks.forResult(null);
+                            myToast = Toast.makeText(mMainActivity,"GoogleCloud Save Fail : " , Toast.LENGTH_SHORT);
                         }
+                        myToast.show();
+                        return Tasks.forResult(null);
+
                     }
                 });
     }
-
+    Toast myToast;
     public Task<String> loadSnapshot(String sLoadSaveName) {
 
         if (sLoadSaveName == null) {
@@ -451,10 +446,16 @@ public class Google extends Activity
                         try {
                             byte[] rawData = snapshot.getSnapshotContents().readFully();
                             if (rawData != null) {
-                                return new String(rawData, StandardCharsets.UTF_8);
+                                String resultStr = new String(rawData, StandardCharsets.UTF_8);
+                                myToast = Toast.makeText(mMainActivity,"GoogleCloud Load Success : " + resultStr, Toast.LENGTH_SHORT);
+
+//                                return resultStr;
                             } else {
-                                return "";
+//                                return "";
+                                myToast = Toast.makeText(mMainActivity,"GoogleCloud Load Fail : " , Toast.LENGTH_SHORT);
                             }
+                            myToast.show();
+
                         } catch (IOException e) {
                             Log.e("", "Error while reading Snapshot.", e);
                         }

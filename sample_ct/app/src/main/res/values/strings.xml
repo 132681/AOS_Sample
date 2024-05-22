@@ -37,17 +37,20 @@
     <string name="filter_view_example_gizmos">filter_view_example_gizmos</string>
     <string name="fb_login_protocol_scheme">fb3026956984044545</string>
     <string name="AndroidPermlission">AndroidPermlission</string>
-    <string name="BacktraceInit">BacktraceInit</string>
-    <string name="BacktraceCrash1">BacktraceCrash1</string>
-    <string name="BacktraceCrash2">BacktraceCrash2</string>
-    <string name="AndridPopupWindow">AndridPopupWindow</string>
+    <string name="GoogleSignin">Google_Signin</string>
+    <string name="GooglePlayServiceSignin">GooglePlayService_Signin</string>
+    <string name="GoogleSignOut">Google_SignOut</string>
+    <string name="GoogleCloudList">Google_Cloud_List</string>
+    <string name="GoogleCloudSave">Google_Cloud_Save</string>
+    <string name="GoogleCloudLoad">Google_Cloud_Load</string>
     <string name="DF_Connect">DF_Connect</string>
     <string name="DF_RefreshProduct">DF_RefreshProduct</string>
     <string name="DF_Purchase">DF_Purchase</string>
     <string name="DF_Consume">DF_Consume</string>
     <string name="DF_Test1">DF_Test1</string>
     <string name="DF_Test2">DF_Test2</string>
-    <string name="app_id">764920947053</string>
+    <string name="app_id">764920947053</string>>
+    <!--string name="app_id">1:764920947053:android:3a48ce8f849f332794ba64</string>-->
     <!--com.linegames.samples-->
     <!--<string name="fb_login_protocol_scheme">fb183085325620769</string>-->
 </resources>

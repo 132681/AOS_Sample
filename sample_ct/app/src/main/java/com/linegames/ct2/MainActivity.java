@@ -83,7 +83,7 @@ public class MainActivity extends Activity
 
         NTBase.getInstance().onCreate( this );
 
-//        Google.GetInstance().StartGoogleSign();
+        Google.GetInstance().StartGoogleSign();
 
         int targetSdkVersion = getApplicationContext().getApplicationInfo().targetSdkVersion;
         Log.d(TAG, "targetSdkVersion : " + targetSdkVersion);
@@ -491,9 +491,8 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "GoogleSign");
-                Google.GetInstance().GooglePlayServiceSign();
-                Log.d(TAG, "Google.GetInstance().GooglePlayServiceSign()========================");
+                Log.d(TAG, "GoogleSignin========================");
+                Google.GetInstance().GoogleSign();
             }
         });
 
@@ -502,19 +501,39 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "Google.GetInstance().signInSilently()========================");
-                Google.GetInstance().signInSilently();
+                Log.d(TAG, "GooglePlayServiceSignin========================");
+                Google.GetInstance().GooglePlayServiceSign();
+            }
+        });
+
+        Button btn34 = (Button) this.findViewById(R.id.button34);
+        btn34.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "GoogleSignOut========================");
+                Google.GetInstance().GoogleSignOut();
             }
         });
 
         String SAVE_GAMENAME_1 = "SaveGame1";
         String SAVE_GAMENAME_2 = "SaveGame2";
-        Button btn34 = (Button) this.findViewById(R.id.button34);
-        btn34.setOnClickListener(new View.OnClickListener() {
+
+        Button btn44 = (Button) this.findViewById(R.id.button44);
+        btn44.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "Google.GetInstance().writeSnapshot()========================");
+                Log.d(TAG, "GoogleCloudList========================");
+                Google.GetInstance().signInSilently();
+            }
+        });
+
+        Button btn43 = (Button) this.findViewById(R.id.button43);
+        btn43.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                Log.d(TAG, "GoogleCloudSave========================");
 
                 String gameData = "Your game data string"; // 저장할 게임 데이터
                 Google.GetInstance().writeSnapshot(SAVE_GAMENAME_1, gameData, SAVE_GAMENAME_1)
@@ -524,11 +543,11 @@ public class MainActivity extends Activity
                                 if (task.isSuccessful()) {
                                     // 게임 콘텐츠가 성공적으로 저장되었을 때의 처리
                                     // 예를 들어, 사용자에게 저장 완료 메시지를 표시하거나 UI를 업데이트할 수 있습니다.
-                                    NTLog.d("","lss Google.GetInstance().writeSnapshot Success : " + task.toString());
+                                    NTLog.d("","lss GoogleCloudSave Success : " + task.toString());
                                 } else {
                                     // 저장이 실패한 경우 처리
                                     Exception e = task.getException();
-                                    NTLog.d("","lss Google.GetInstance().writeSnapshot Error : " + e.toString());
+                                    NTLog.d("","lss GoogleCloudSave Error : " + e.toString());
                                     // 에러 메시지를 표시하거나 적절한 오류 처리를 수행합니다.
                                 }
                             }
@@ -542,20 +561,20 @@ public class MainActivity extends Activity
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "Google.GetInstance().loadSnapshot()========================");
+                Log.d(TAG, "GoogleCloudLoad========================");
                 Google.GetInstance().loadSnapshot(SAVE_GAMENAME_1).addOnCompleteListener(new OnCompleteListener<String>() {
                     @Override
                     public void onComplete(@NonNull Task<String> task) {
                         if (task.isSuccessful()) {
                             // 작업이 성공적으로 완료됐을 때
                             String snapshotData = task.getResult();
-                            Log.d(TAG, "lss loadSnapshot : " + snapshotData);
+                            Log.d(TAG, "lss GoogleCloudLoad Success : " + snapshotData);
                             // snapshotData를 사용하여 필요한 작업을 수행합니다.
                         } else {
                             // 작업이 실패했을 때
                             Exception e = task.getException();
                             // 실패 이유를 처리합니다.
-                            Log.d(TAG, "lss loadSnapshot e : " + e.toString());
+                            Log.d(TAG, "lss GoogleCloudLoad fail e : " + e.toString());
                         }
                     }
                 });
