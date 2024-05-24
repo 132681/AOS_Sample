@@ -408,8 +408,7 @@ public class Google extends Activity
                                 .build();
 
                         if (snapshot != null) {
-                            //return snapshotsClient.commitAndClose(snapshot, metadataChange);
-                            myToast = Toast.makeText(mMainActivity,"GoogleCloud Save Success : " + sSaveData , Toast.LENGTH_SHORT);
+                            return snapshotsClient.commitAndClose(snapshot, metadataChange);
 
                         } else {
                             // Return a completed task with null result if snapshot is null
@@ -448,8 +447,8 @@ public class Google extends Activity
                             if (rawData != null) {
                                 String resultStr = new String(rawData, StandardCharsets.UTF_8);
                                 myToast = Toast.makeText(mMainActivity,"GoogleCloud Load Success : " + resultStr, Toast.LENGTH_SHORT);
-
-//                                return resultStr;
+//                                return Tasks.forResult(resultStr);
+                                return resultStr;
                             } else {
 //                                return "";
                                 myToast = Toast.makeText(mMainActivity,"GoogleCloud Load Fail : " , Toast.LENGTH_SHORT);
