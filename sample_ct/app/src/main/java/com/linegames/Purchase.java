@@ -173,6 +173,55 @@ public class Purchase implements PurchasesUpdatedListener
         NTLog.d("RegisterProduct pID : " +jProductID );
     }
 
+//    public static void RefreshProductInfo( final long userCB )
+//    {
+//
+//        final ArrayList<String> tempProductsId = productIdArr;
+//        final int inputProductsCount = tempProductsId.size();
+//        final int defaultCount = 20;
+//
+//        NTLog.d("RefreshProductInfo() Input ProductId : " + tempProductsId.toString());
+//
+//        final JSONArray productsJsonArray = new JSONArray();
+//        mProductDetailsList = new ArrayList<ProductDetails>();
+//        final ArrayList<String> invalidProductsId = tempProductsId;
+//        final int[] queryCompleteCounter = new int[] { 0 };
+//        final int loopCnt = inputProductsCount / defaultCount;
+//        NTLog.d("RefreshProductInfo() loopCnt  " + loopCnt + "= inputProductsCount /" + inputProductsCount + " defaultCount " + defaultCount);
+//
+//        for(int i = 0 ; i < loopCnt + 1; i++)
+//        {
+//            int fromIndex = i * defaultCount;
+//            int toIndex = Math.min(inputProductsCount, ( i + 1 ) * defaultCount);
+//            if( toIndex > inputProductsCount )
+//                continue;
+//
+//            List<String> productsInfo = tempProductsId.subList( fromIndex , toIndex );
+//
+//            NTLog.d(" ================ i : " + i + "================");
+//
+//
+//            NTLog.d(" fromIndex : " + fromIndex + " toIndex : " + toIndex );
+//            for (int j = 0; j < productsInfo.size(); j++){
+//                NTLog.d(" productsInfo.size() : " + productsInfo.size() + " j :  " + j + " " + productsInfo.get(j));
+//            }
+//
+////            List<QueryProductDetailsParams.Product> productsInfoParams = new ArrayList<>();
+////
+////            if (productsInfo.size() < 1)
+////                continue;
+////
+////            for (String pid : productsInfo) {
+////                NTLog.d("lss RefreshProductInfo() 1 : ");
+////                if (pid == null || pid.isEmpty())
+////                    continue;
+////
+////            }
+//
+//
+//        }
+//    }
+
     public static void RefreshProductInfo( final long userCB )
     {
 
@@ -201,13 +250,23 @@ public class Purchase implements PurchasesUpdatedListener
 
             if (productsInfo.size() < 1)
                 continue;
+            NTLog.d("lss RefreshProductInfo() 0 : ");
 
             for (String pid : productsInfo) {
+                NTLog.d("lss RefreshProductInfo() 1 : ");
+                if (pid == null || pid.isEmpty())
+                    continue;
+
                 productsInfoParams.add(QueryProductDetailsParams.Product.newBuilder()
                         .setProductId(pid)
-//                        .setProductType(BillingClient.ProductType.SUBS)
                         .setProductType(BillingClient.ProductType.INAPP)
                         .build());
+            }
+            NTLog.d("lss RefreshProductInfo() 3 : ");
+
+            if (productsInfoParams.isEmpty()) {
+                NTLog.e("제품 리스트가 비어 있습니다.");
+                continue; // 또는 예외 처리 코드를 추가할 수 있습니다.
             }
 
             QueryProductDetailsParams params = QueryProductDetailsParams.newBuilder()
@@ -226,15 +285,13 @@ public class Purchase implements PurchasesUpdatedListener
                                                      List<ProductDetails> ProductDetailsList)
                 {
 
-                    NTLog.d("billingResult.getDebugMessage() : " + billingResult.getDebugMessage() );
-                    NTLog.d("billingResult.getResponseCode() : " + billingResult.getResponseCode() );
                     NTLog.d("billingResult.toString() : " + billingResult.toString() );
                     if ( billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK )
                     {
                         mProductDetailsList.addAll(ProductDetailsList);
                         try {
                             for (ProductDetails product : ProductDetailsList) {
-                                NTLog.d("billingResult.getProductType() : " + product.getProductType() );
+                                //NTLog.d("billingResult.getProductType() : " + product.getProductType() );
 
                                 mProductDetailsListMap.put( product.getProductId(), product );
                                 productsJsonArray.put(new JSONObject()
@@ -322,7 +379,6 @@ public class Purchase implements PurchasesUpdatedListener
         mMainActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
                 ProductDetails buyProductSkuDetail = null;
                 if ( mProductDetailsList != null )
                 {
@@ -339,9 +395,9 @@ public class Purchase implements PurchasesUpdatedListener
                             NTLog.d("Dont find productID SkuDetail : " + productID);
                         }
                     }
-
                     if ( buyProductSkuDetail == null || buyProductSkuDetail.getProductId().isEmpty() )
                     {
+
                         result_msg = "ProductID does no match. Please Check productID ( " + productID + " ) ";
                         NTLog.d(result_msg);
                         GetInstance().Invoke( "UNKNOWN", new JSONArray(), result_msg, result_ResponseCode , userCB );
@@ -487,14 +543,14 @@ public class Purchase implements PurchasesUpdatedListener
     }
 
     public static void Consume( final String productID, final long userCB ) throws JSONException {
-        NTLog.d(" Consume() productID : " + productID );
+        NTLog.d("Consume() productID 1: " + productID );
 
 
         if ( !CheckInitlized( userCB ) ) return;
 
         if ( productID.isEmpty() )
         {
-            result_msg = " Consume() productID is NULL.";
+            result_msg = "Consume() productID is NULL.";
             NTLog.e(result_msg);
             GetInstance().Invoke( result_status, new JSONArray(), result_msg, result_ResponseCode , userCB );
         }
@@ -502,18 +558,29 @@ public class Purchase implements PurchasesUpdatedListener
         {
             if ( mPurchases != null )
             {
+                NTLog.d("Consume() productID 2: " + productID );
+
                 ConsumeParams consumeParams = null;
                 for (com.android.billingclient.api.Purchase purchaseData : mPurchases )
                 {
+                    NTLog.d("Consume() productID 3: " + productID );
                     if ( productID.equals(GetInstance().GetProductIdFromReceipt(purchaseData.getOriginalJson())) )
                     {
+                        NTLog.d("Consume() productID getOriginalJson 4: " + purchaseData.getOriginalJson() );
+                        NTLog.d("Consume() productID getPurchaseToken 4: " + purchaseData.getPurchaseToken() );
+                        NTLog.d("Consume() productID 4: " + productID );
                         consumeParams = ConsumeParams.newBuilder()
                                 .setPurchaseToken(purchaseData.getPurchaseToken())
                                 .build();
-                        NTLog.d(" Consume() consumeParams productID : " + GetInstance().GetProductIdFromReceipt(purchaseData.getOriginalJson()) );
+                        NTLog.d("Consume() consumeParams productID : " + GetInstance().GetProductIdFromReceipt(purchaseData.getOriginalJson()) );
                         break;
                     }
+                    else {
+                        NTLog.d("Consume() consumeParams productID not ");
+                    }
                 }
+
+                NTLog.d("Consume() productID 5: " + productID );
 
                 if ( consumeParams != null )
                 {

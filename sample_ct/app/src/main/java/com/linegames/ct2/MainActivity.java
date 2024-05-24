@@ -11,7 +11,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.android.billingclient.api.SkuDetails;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -51,6 +55,7 @@ import androidx.core.app.ActivityCompat;
 public class MainActivity extends Activity
 {
     private static final String TAG = "NTSDK";
+    public static String PurchaseConsumeProductId = "cointop2_google_play_gem100";
     public static String ConsumeProductId1 = "cointop2_google_play_gem100";
 //    public static String ConsumeProductId1 = "cointop2_google_play_gem300";
     public static String ConsumeProductId1Sub = "cointop2_google_play_gem100_sub";
@@ -305,6 +310,27 @@ public class MainActivity extends Activity
                     Purchase.GetInstance().RegisterProduct (pid);
                 }
 
+                //dropBos 초기화
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(NTBase.getMainActivity(), android.R.layout.simple_spinner_dropdown_item, pidArray);
+
+                Spinner spinner = findViewById(R.id.spinner);
+                spinner.setAdapter(adapter);
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        // 선택된 항목을 가져옴
+                        String selectedItem = (String) parent.getItemAtPosition(position);
+                        // 선택된 항목을 Toast 메시지로 표시
+                        PurchaseConsumeProductId = selectedItem;
+                        Toast.makeText(MainActivity.this, "Selected: " + selectedItem, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        // 아무 항목도 선택되지 않았을 때의 동작 정의 (필요 시)
+                    }
+                });
+
                 Purchase.GetInstance().RefreshProductInfo (111);
 //                PurchaseSub.GetInstance().RefreshProductInfo (111);
             }
@@ -315,8 +341,7 @@ public class MainActivity extends Activity
             public void onClick(View view)
             {
                 Log.d(TAG, "BuyProduct");
-//                String payloadTest = "abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz_abcdefghij_";
-                Purchase.GetInstance().BuyProduct(ConsumeProductId1, "cointop2_google_play_gem100.414132124.uwo_kr_server1", 11);
+                Purchase.GetInstance().BuyProduct(PurchaseConsumeProductId, PurchaseConsumeProductId +".414132124.uwo_kr_server1", 11);
             }
         });
 
@@ -342,7 +367,7 @@ public class MainActivity extends Activity
             {
                 Log.d(TAG, "Consume");
                 try {
-                    Purchase.GetInstance().Consume(ConsumeProductId1,111);
+                    Purchase.GetInstance().Consume(PurchaseConsumeProductId,111);
 //                    PurchaseSub.GetInstance().Consume(ConsumeProductId1Sub,111);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -515,9 +540,6 @@ public class MainActivity extends Activity
             }
         });
 
-        String SAVE_GAMENAME_1 = "SaveGame1";
-        String SAVE_GAMENAME_2 = "SaveGame2";
-
         Button btn44 = (Button) this.findViewById(R.id.button44);
         btn44.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -528,6 +550,11 @@ public class MainActivity extends Activity
             }
         });
 
+        String SAVE_GAMENAME_1 = "SaveGame1";
+        String LOAD_SUNU = "CT_qa";
+        String gameData = "SUNU BABO~~~"; // 저장할 게임 데이터
+
+        String SAVE_GAMENAME_2 = "SaveGame2";
         Button btn43 = (Button) this.findViewById(R.id.button43);
         btn43.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -535,8 +562,7 @@ public class MainActivity extends Activity
             {
                 Log.d(TAG, "GoogleCloudSave========================");
 
-                String gameData = "Your game data string"; // 저장할 게임 데이터
-                Google.GetInstance().writeSnapshot(SAVE_GAMENAME_1, gameData, SAVE_GAMENAME_1)
+                Google.GetInstance().writeSnapshot(LOAD_SUNU, "NODATA", SAVE_GAMENAME_1)
                         .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
                             @Override
                             public void onComplete(@NonNull Task<SnapshotMetadata> task) {
@@ -552,7 +578,6 @@ public class MainActivity extends Activity
                                 }
                             }
                         });
-
             }
         });
 
@@ -562,7 +587,7 @@ public class MainActivity extends Activity
             public void onClick(View view)
             {
                 Log.d(TAG, "GoogleCloudLoad========================");
-                Google.GetInstance().loadSnapshot(SAVE_GAMENAME_1).addOnCompleteListener(new OnCompleteListener<String>() {
+                Google.GetInstance().loadSnapshot(LOAD_SUNU).addOnCompleteListener(new OnCompleteListener<String>() {
                     @Override
                     public void onComplete(@NonNull Task<String> task) {
                         if (task.isSuccessful()) {
