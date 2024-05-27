@@ -26,7 +26,7 @@ import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
 import com.android.billingclient.api.SkuDetailsResponseListener;
-import com.linegames.base.NTBase;
+import com.linegames.base.LGBase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -76,7 +76,7 @@ public class AndroidPermission
                 if ( getInstance == null )
                     getInstance = new AndroidPermission();
             }
-            mMainActivity = NTBase.getMainActivity();
+            mMainActivity = LGBase.getMainActivity();
         }
         return getInstance;
     }

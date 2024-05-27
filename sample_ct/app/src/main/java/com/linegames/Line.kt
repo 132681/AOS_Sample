@@ -15,8 +15,8 @@ import com.linecorp.linesdk.api.LineApiClient
 import com.linecorp.linesdk.api.LineApiClientBuilder
 import com.linecorp.linesdk.auth.LineAuthenticationParams
 import com.linecorp.linesdk.auth.LineLoginApi
-import com.linegames.base.NTBase
-import com.linegames.base.NTLog
+import com.linegames.base.LGBase
+import com.linegames.base.LGLog
 import org.json.JSONObject
 import java.util.*
 
@@ -41,7 +41,7 @@ class Line {
         val lineApiClient: LineApiClient by lazy()
         {
             Log.d(TAG, "======================Line API =====================================" + VERSION_NAME)
-            val apiClientBuilder = LineApiClientBuilder(NTBase.MainActivity, LINE_CHANNEL_ID)
+            val apiClientBuilder = LineApiClientBuilder(LGBase.MainActivity, LINE_CHANNEL_ID)
             apiClientBuilder.build()
         }
 
@@ -102,18 +102,18 @@ class Line {
         fun ConnectPermission() {
 
             if (ActivityCompat.checkSelfPermission(
-                    NTBase.MainActivity,
+                    LGBase.MainActivity,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 ActivityCompat.requestPermissions(
-                    NTBase.MainActivity,
+                    LGBase.MainActivity,
                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     1
                 )
                 Log.d("TAG","AndroidPermission ShowPermission() userCB : request")
             } else if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    NTBase.MainActivity,
+                    LGBase.MainActivity,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 )
             ) {
@@ -198,14 +198,14 @@ class Line {
             Thread(Runnable {
                 try {
                     val loginIntent = LineLoginApi.getLoginIntent(
-                        NTBase.MainActivity,
+                        LGBase.MainActivity,
                         LINE_CHANNEL_ID,
                         LineAuthenticationParams.Builder()
                             .scopes(Arrays.asList(Scope.PROFILE))
                             .build()
                     )
                     ActivityCompat.startActivityForResult(
-                        NTBase.MainActivity,
+                        LGBase.MainActivity,
                         loginIntent,
                         LINE_LOGIN_REQUEST_CODE,
                         null

@@ -7,7 +7,7 @@ import android.content.Context
 import android.content.SharedPreferences
 
 import org.json.JSONObject
-import com.linegames.base.NTBase
+import com.linegames.base.LGBase
 import com.linegames.permissionNotice.NTPermissionNoticeActivity
 
 class UMG
@@ -24,13 +24,13 @@ class UMG
 			
 		@JvmStatic fun CheckSaveData() : Boolean
 		{
-			val prefs: SharedPreferences = NTBase.MainActivity.getSharedPreferences("prefs_UMG", Context.MODE_PRIVATE)
+			val prefs: SharedPreferences = LGBase.MainActivity.getSharedPreferences("prefs_UMG", Context.MODE_PRIVATE)
 			return prefs.getBoolean("bFirst", false)
 		}
 		
 		@JvmStatic fun CreateSaveData()
 		{
-			val prefs: SharedPreferences = NTBase.MainActivity.getSharedPreferences("prefs_UMG", Context.MODE_PRIVATE)
+			val prefs: SharedPreferences = LGBase.MainActivity.getSharedPreferences("prefs_UMG", Context.MODE_PRIVATE)
 			prefs.edit().putBoolean("bFirst", true).apply()
 		}
 		
@@ -38,7 +38,7 @@ class UMG
 		{
 			callback = userCB
 
-			val intent = Intent(NTBase.MainActivity, NTPermissionNoticeActivity::class.java)
+			val intent = Intent(LGBase.MainActivity, NTPermissionNoticeActivity::class.java)
 
 			intent.putExtra("titles", titleArray)
 			intent.putExtra("descriptions", descriptionArray)
@@ -46,7 +46,7 @@ class UMG
 				it.lowercase() == "true"
 			}.toBooleanArray())
 			
-			NTBase.MainActivity.startActivityForResult(intent, UMG_REQUEST_CODE)
+			LGBase.MainActivity.startActivityForResult(intent, UMG_REQUEST_CODE)
 		}
 	}
 	

@@ -15,7 +15,7 @@ import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryPurchasesParams;
 import com.google.common.collect.ImmutableList;
-import com.linegames.base.NTLog;
+import com.linegames.base.LGLog;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
@@ -28,7 +28,7 @@ import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.ProductDetailsResponseListener;
-import com.linegames.base.NTBase;
+import com.linegames.base.LGBase;
 import com.linegames.ct2.MainActivity;
 
 import org.json.JSONArray;
@@ -83,18 +83,18 @@ public class PurchaseSub implements PurchasesUpdatedListener
 
         if ( IsConnected() ) {
             result_msg = "PurchaseAPI Already connected.";
-            NTLog.e(result_msg);
+            LGLog.e(result_msg);
             result_status = "NT_SUCCESS";
             result_ResponseCode = 0;
             GetInstance().Invoke( result_status, new JSONArray(), result_msg, result_ResponseCode , userCB );
             return;
         }
 
-        mMainActivity = NTBase.getMainActivity();
+        mMainActivity = LGBase.getMainActivity();
         if (mMainActivity == null)
         {
             result_msg = "Connect() mMainActivity is null.";
-            NTLog.e(result_msg);
+            LGLog.e(result_msg);
             result_status = "UNKNOWN";
             result_ResponseCode = -1;
             GetInstance().Invoke( result_status, new JSONArray(), result_msg, result_ResponseCode , userCB );
@@ -154,7 +154,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
         {
             mBillingClient.endConnection();
             mBillingClient = null;
-            NTLog.i("Connection DisConnect" );
+            LGLog.i("Connection DisConnect" );
         }
     }
 
@@ -162,7 +162,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
     {
         if (jProductID.isEmpty())
         {
-            NTLog.e("RegisterProduct pID is null");
+            LGLog.e("RegisterProduct pID is null");
             return;
         }
 
@@ -173,7 +173,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
             return;
 
         GetInstance().productIdArr.add(jProductID);
-        NTLog.d("RegisterProduct pID : " +jProductID );
+        LGLog.d("RegisterProduct pID : " +jProductID );
     }
 
     private MutableLiveData<Map<String, QueryProductDetailsParams>> skusWithSkuDetails;
@@ -185,7 +185,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
     public static void RefreshProductInfo( final long userCB )
     {
 
-        NTLog.d(LOG_TAG, "querySkuDetails");
+        LGLog.d(LOG_TAG, "querySkuDetails");
 
 
         QueryProductDetailsParams params =
@@ -205,24 +205,24 @@ public class PurchaseSub implements PurchasesUpdatedListener
             public void onProductDetailsResponse(BillingResult billingResult,
                                                  List<ProductDetails> ProductDetailsList)
             {
-                NTLog.d("billingResult.getDebugMessage() : " + billingResult.getDebugMessage() );
-                NTLog.d("billingResult.getResponseCode() : " + billingResult.getResponseCode() );
-                NTLog.d("billingResult.toString() : " + billingResult.toString() );
-                NTLog.d("ProductDetailsList.toString() 0 : " + ProductDetailsList.toString() );
-                NTLog.d("ProductDetailsList size 0 : " + ProductDetailsList.size() );
-                NTLog.d("ProductDetailsList size 1230 : " + ProductDetailsList.size() );
+                LGLog.d("billingResult.getDebugMessage() : " + billingResult.getDebugMessage() );
+                LGLog.d("billingResult.getResponseCode() : " + billingResult.getResponseCode() );
+                LGLog.d("billingResult.toString() : " + billingResult.toString() );
+                LGLog.d("ProductDetailsList.toString() 0 : " + ProductDetailsList.toString() );
+                LGLog.d("ProductDetailsList size 0 : " + ProductDetailsList.size() );
+                LGLog.d("ProductDetailsList size 1230 : " + ProductDetailsList.size() );
                 mProductDetailsList.addAll(ProductDetailsList);
 
                 try {
                     for (ProductDetails product : ProductDetailsList) {
-                        NTLog.d("Sub getProductType() getProductId : " + product.getProductId() );
-                        NTLog.d("Sub getProductType() getProductType : " + product.getProductType() );
-                        NTLog.d("Sub getProductType() getDescription : " + product.getDescription() );
-                        NTLog.d("Sub getProductType() getName : " + product.getName() );
-                        NTLog.d("Sub getProductType() getTitle : " + product.getTitle() );
-                        NTLog.d("Sub getProductType() getOneTimePurchaseOfferDetails : " + product.getOneTimePurchaseOfferDetails() );
-                        NTLog.d("Sub getProductType() getSubscriptionOfferDetails : " + product.getSubscriptionOfferDetails() );
-                        NTLog.d("Sub getProductType() hashCode : " + product.hashCode() );
+                        LGLog.d("Sub getProductType() getProductId : " + product.getProductId() );
+                        LGLog.d("Sub getProductType() getProductType : " + product.getProductType() );
+                        LGLog.d("Sub getProductType() getDescription : " + product.getDescription() );
+                        LGLog.d("Sub getProductType() getName : " + product.getName() );
+                        LGLog.d("Sub getProductType() getTitle : " + product.getTitle() );
+                        LGLog.d("Sub getProductType() getOneTimePurchaseOfferDetails : " + product.getOneTimePurchaseOfferDetails() );
+                        LGLog.d("Sub getProductType() getSubscriptionOfferDetails : " + product.getSubscriptionOfferDetails() );
+                        LGLog.d("Sub getProductType() hashCode : " + product.hashCode() );
 
                         mProductDetailsListMap.put( product.getProductId(), product );
 //                        productsJsonArray.put(new JSONObject()
@@ -238,10 +238,10 @@ public class PurchaseSub implements PurchasesUpdatedListener
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    NTLog.e(e.getMessage());
+                    LGLog.e(e.getMessage());
                 }
 
-                NTLog.d("ProductDetailsList size 1230 end " );
+                LGLog.d("ProductDetailsList size 1230 end " );
 
             }
         });
@@ -251,7 +251,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
     public static void BuyProduct( String jProductID, String jDeveloperPayload, long lUserCB )
     {
 
-        NTLog.d("BuyProduct productID : " + jProductID + " DeveloperPayload : " + jDeveloperPayload );
+        LGLog.d("BuyProduct productID : " + jProductID + " DeveloperPayload : " + jDeveloperPayload );
         final String productID = jProductID;
         final String developerPayload = jDeveloperPayload;
         final long userCB = lUserCB;
@@ -262,7 +262,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
 
         if ( productID.isEmpty() ) {
             result_msg = "BuyProduct() productID is null.";
-            NTLog.e(result_msg);
+            LGLog.e(result_msg);
             GetInstance().Invoke( result_status, new JSONArray(), result_msg, result_ResponseCode , userCB );
             return;
         }
@@ -277,13 +277,13 @@ public class PurchaseSub implements PurchasesUpdatedListener
                 {
                     if ( detail.getProductId().equals(productID) )
                     {
-                        NTLog.d("find productID SkuDetail : " + productID);
+                        LGLog.d("find productID SkuDetail : " + productID);
                         buyProductSkuDetail = detail;
                         break;
                     }
                     else
                     {
-                        NTLog.d("Dont find productID SkuDetail : " + productID);
+                        LGLog.d("Dont find productID SkuDetail : " + productID);
                     }
                 }
 
@@ -302,7 +302,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
 //
 //
 //                int resultCode = mBillingClient.launchBillingFlow(mMainActivity, billingFlowParams).getResponseCode();
-//                NTLog.i("onPurchasesUpdated resultCode " + resultCode);
+//                LGLog.i("onPurchasesUpdated resultCode " + resultCode);
 
                 ImmutableList productDetailsParamsList =
                         ImmutableList.of(
@@ -322,7 +322,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
 
                 BillingResult billingResult = mBillingClient.launchBillingFlow(mMainActivity, billingFlowParams);
 
-                NTLog.i("Sub onPurchasesUpdated billingResult.toString() " + billingResult.toString());
+                LGLog.i("Sub onPurchasesUpdated billingResult.toString() " + billingResult.toString());
             }
         });
     }
@@ -336,11 +336,11 @@ public class PurchaseSub implements PurchasesUpdatedListener
         int responseCode = billingResult.getResponseCode();
         final JSONArray productsJsonArray = new JSONArray();
 
-        NTLog.i("Sub onPurchasesUpdated: $responseCode $debugMessage responseCode " + responseCode);
+        LGLog.i("Sub onPurchasesUpdated: $responseCode $debugMessage responseCode " + responseCode);
         switch (responseCode) {
             case BillingClient.BillingResponseCode.OK:
                 if (purchases == null) {
-                    NTLog.e("onPurchasesUpdated: null purchase list");
+                    LGLog.e("onPurchasesUpdated: null purchase list");
                 }
                 else
                 {
@@ -349,7 +349,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
                     try {
                         for (com.android.billingclient.api.Purchase product : mPurchases)
                         {
-                            NTLog.i("onPurchasesUpdated  product.toString() " + product.toString());
+                            LGLog.i("onPurchasesUpdated  product.toString() " + product.toString());
 
                             productsJsonArray.put(new JSONObject()
 //                                    .put("productId", product. )
@@ -369,7 +369,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
                             {
                                 if (product.getOrderId().equals( GetInstance().GetSharedPreferencesData(product.getOrderId())) )
                                 {
-                                    NTLog.d("Purchase Pending Return. (" + GetInstance().GetProductIdFromReceipt(product.getOriginalJson()) + ")");
+                                    LGLog.d("Purchase Pending Return. (" + GetInstance().GetProductIdFromReceipt(product.getOriginalJson()) + ")");
                                     GetInstance().RemoveSharedPreferencesData(product.getOrderId());
                                     return;
                                 }
@@ -378,7 +378,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
                     } catch (Exception e) {
                         e.printStackTrace();
                         result_msg = e.getMessage();
-                        NTLog.e(result_msg);
+                        LGLog.e(result_msg);
                     }
                 }
 
@@ -388,12 +388,12 @@ public class PurchaseSub implements PurchasesUpdatedListener
             case BillingClient.BillingResponseCode.USER_CANCELED:
                 result_msg = "onPurchasesUpdated: User canceled the purchase.";
                 result_status = "USER_CANCELED";
-                NTLog.i(result_msg);
+                LGLog.i(result_msg);
                 break;
             case BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED:
                 result_status = "ITEM_ALREADY_OWNED";
                 result_msg = "onPurchasesUpdated: The user already owns this item";
-                NTLog.i(result_msg);
+                LGLog.i(result_msg);
                 //Need Consume Process
                 break;
             case BillingClient.BillingResponseCode.DEVELOPER_ERROR:
@@ -402,22 +402,22 @@ public class PurchaseSub implements PurchasesUpdatedListener
                         "make sure you have configured the application correctly in the " +
                         "Google Play Console. The SKU product ID must match and the APK you " +
                         "are using must be signed with release keys.";
-                NTLog.i(result_msg);
+                LGLog.i(result_msg);
                 break;
             case BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE:
                 result_msg = "onPurchasesUpdated: Need Goolge Account Login!!!";
-                NTLog.i(result_msg);
+                LGLog.i(result_msg);
                 //Need Google Account login
                 break;
             case BillingClient.BillingResponseCode.ITEM_UNAVAILABLE:
                 result_msg = "Need Test URL confirm.";
-                NTLog.i(result_msg);
+                LGLog.i(result_msg);
                 //Need Test URL confrim
                 break;
             case BillingClient.BillingResponseCode.ERROR:
                 result_msg = "This card cannot be paid.";
                 result_status = "CREDITCARD_UNAVAILABLE";
-                NTLog.i(result_msg);
+                LGLog.i(result_msg);
                 //This creditcard cannot be paid.
                 break;
         }
@@ -425,13 +425,13 @@ public class PurchaseSub implements PurchasesUpdatedListener
     }
 
     public static void Consume( final String productID, final long userCB ) throws JSONException {
-        NTLog.d("Sub Consume() productID : " + productID );
+        LGLog.d("Sub Consume() productID : " + productID );
         if ( !CheckInitlized( userCB ) ) return;
 
         if ( productID.isEmpty() )
         {
             result_msg = "Sub Consume() productID is NULL.";
-            NTLog.e(result_msg);
+            LGLog.e(result_msg);
             GetInstance().Invoke( result_status, new JSONArray(), result_msg, result_ResponseCode , userCB );
         }
         else
@@ -457,19 +457,19 @@ public class PurchaseSub implements PurchasesUpdatedListener
 
                                 if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
                                 {
-                                    NTLog.d("Sub Consume Success (" + productID + " ) ");
+                                    LGLog.d("Sub Consume Success (" + productID + " ) ");
                                 }
                                 else
                                 {
-                                    NTLog.d("Sub Consume Fail. (" + productID + " ) ");
-                                    NTLog.d("acknowledgePurchase: " + responseCode + "debugMessage : " + debugMessage);
+                                    LGLog.d("Sub Consume Fail. (" + productID + " ) ");
+                                    LGLog.d("acknowledgePurchase: " + responseCode + "debugMessage : " + debugMessage);
                                 }
                             }
                         });
                     }
                     else
                     {
-                        NTLog.d("Sub Consume() NOT Exist productID : " + productID + "GetInstance().GetProductIdFromReceipt(purchaseData.getOriginalJson())" + GetInstance().GetProductIdFromReceipt(purchaseData.getOriginalJson()));
+                        LGLog.d("Sub Consume() NOT Exist productID : " + productID + "GetInstance().GetProductIdFromReceipt(purchaseData.getOriginalJson())" + GetInstance().GetProductIdFromReceipt(purchaseData.getOriginalJson()));
                     }
                 }
 
@@ -480,8 +480,8 @@ public class PurchaseSub implements PurchasesUpdatedListener
 //                        @Override
 //                        public void onConsumeResponse(BillingResult billingResult, String s)
 //                        {
-//                            NTLog.d(" Sub Consume() billingResult : " + billingResult.toString() );
-//                            NTLog.d(" Sub Consume() s : " + s );
+//                            LGLog.d(" Sub Consume() billingResult : " + billingResult.toString() );
+//                            LGLog.d(" Sub Consume() s : " + s );
 //
 //                            if ( billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK )
 //                            {
@@ -494,7 +494,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
 //                                result_msg = productID + " Purchase.java Consume() fail ";
 //                                result_ResponseCode = billingResult.getResponseCode();
 //                            }
-//                            NTLog.d(result_msg );
+//                            LGLog.d(result_msg );
 //                            GetInstance().Invoke( result_status, productsJsonArray , result_msg, result_ResponseCode , userCB );
 //                        }
 //                    });
@@ -502,14 +502,14 @@ public class PurchaseSub implements PurchasesUpdatedListener
 //                else
 //                {
 //                    result_msg = productID + " Consume() consumeParams is null. Check the productID ";
-//                    NTLog.d(result_msg);
+//                    LGLog.d(result_msg);
 //                    GetInstance().Invoke( result_status, new JSONArray(), result_msg, result_ResponseCode , userCB );
 //                }
             }
             else
             {
                 result_msg = productID + " Consume() mPurchases is null.";
-                NTLog.d(result_msg);
+                LGLog.d(result_msg);
                 GetInstance().Invoke( result_status, new JSONArray(), result_msg, result_ResponseCode , userCB );
             }
         }
@@ -517,7 +517,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
 
     public static void RestoreProduct( long userCB )
     {
-        NTLog.d("RestoreProduct() start" );
+        LGLog.d("RestoreProduct() start" );
 
         if ( !CheckInitlized( userCB ) ) return;
         final JSONArray productsJsonArray = new JSONArray();
@@ -525,7 +525,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
 
 //        if (mProductDetailsListMap == null || mProductDetailsListMap.size() < 1)
 //        {
-//            NTLog.e("RestoreProduct() mProductDetailsListMap is null. ");
+//            LGLog.e("RestoreProduct() mProductDetailsListMap is null. ");
 //            GetInstance().Invoke( "UNKNOWN", productsJsonArray, "RestoreProduct is not ready. Call RefreshProductInfo() API.", -1 , userCB );
 //            return;
 //        }
@@ -533,21 +533,21 @@ public class PurchaseSub implements PurchasesUpdatedListener
         mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build(), new PurchasesResponseListener() {
             @Override
             public void onQueryPurchasesResponse(BillingResult billingResult, List<com.android.billingclient.api.Purchase> list) {
-                NTLog.d("Sub queryPurchasesAsync billingResult.toString() : " + billingResult.toString());
-                NTLog.d("Sub queryPurchasesAsync list size : " + list.size());
+                LGLog.d("Sub queryPurchasesAsync billingResult.toString() : " + billingResult.toString());
+                LGLog.d("Sub queryPurchasesAsync list size : " + list.size());
                 mPurchases = list;
                 for ( com.android.billingclient.api.Purchase PurchasesResult : list ) {
 
-                    NTLog.d("Sub RestoreProduct PurchasesResult.toString() : " + PurchasesResult.toString());
-                    NTLog.d("Sub RestoreProduct getOrderId.toString() : " + PurchasesResult.getOrderId());
-                    NTLog.d("Sub RestoreProduct getOriginalJson.toString() : " + PurchasesResult.getOriginalJson());
-                    NTLog.d("Sub RestoreProduct getPackageName.toString() : " + PurchasesResult.getPackageName());
-                    NTLog.d("Sub RestoreProduct getSignature.toString() : " + PurchasesResult.getSignature());
-                    NTLog.d("Sub RestoreProduct getAccountIdentifiers.toString() : " + PurchasesResult.getAccountIdentifiers());
-                    NTLog.d("Sub RestoreProduct getProducts.toString() : " + PurchasesResult.getProducts());
-                    NTLog.d("Sub RestoreProduct getPurchaseState.toString() : " + PurchasesResult.getPurchaseState());
-                    NTLog.d("Sub RestoreProduct getPurchaseTime.toString() : " + PurchasesResult.getPurchaseTime());
-                    NTLog.d("Sub RestoreProduct getQuantity.toString() : " + PurchasesResult.getQuantity());
+                    LGLog.d("Sub RestoreProduct PurchasesResult.toString() : " + PurchasesResult.toString());
+                    LGLog.d("Sub RestoreProduct getOrderId.toString() : " + PurchasesResult.getOrderId());
+                    LGLog.d("Sub RestoreProduct getOriginalJson.toString() : " + PurchasesResult.getOriginalJson());
+                    LGLog.d("Sub RestoreProduct getPackageName.toString() : " + PurchasesResult.getPackageName());
+                    LGLog.d("Sub RestoreProduct getSignature.toString() : " + PurchasesResult.getSignature());
+                    LGLog.d("Sub RestoreProduct getAccountIdentifiers.toString() : " + PurchasesResult.getAccountIdentifiers());
+                    LGLog.d("Sub RestoreProduct getProducts.toString() : " + PurchasesResult.getProducts());
+                    LGLog.d("Sub RestoreProduct getPurchaseState.toString() : " + PurchasesResult.getPurchaseState());
+                    LGLog.d("Sub RestoreProduct getPurchaseTime.toString() : " + PurchasesResult.getPurchaseTime());
+                    LGLog.d("Sub RestoreProduct getQuantity.toString() : " + PurchasesResult.getQuantity());
 
                     try {
                         productsJsonArray.put(new JSONObject()
@@ -561,7 +561,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
                     catch (Exception e)
                     {
                         e.printStackTrace();
-                        NTLog.e("Sub RestoreProduct catch!!!!");
+                        LGLog.e("Sub RestoreProduct catch!!!!");
                     }
                 }
 
@@ -575,7 +575,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
 
     public static void ShowPlayStoreSubscriptionPage(String sProductId)
     {
-        NTLog.i("Viewing subscriptions on the Google Play Store");
+        LGLog.i("Viewing subscriptions on the Google Play Store");
         String url;
         if (sProductId == null) {
             // If the SKU is not specified, just open the Google Play subscriptions URL.
@@ -591,17 +591,17 @@ public class PurchaseSub implements PurchasesUpdatedListener
 
     public static void ConsumeAll( long userCB )
     {
-        NTLog.i("Sub ConsumeAll()");
+        LGLog.i("Sub ConsumeAll()");
 
         ShowPlayStoreSubscriptionPage(ConsumeProductId1);
 //        mBillingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(), new PurchasesResponseListener() {
 //            @Override
 //            public void onQueryPurchasesResponse(BillingResult billingResult, List<com.android.billingclient.api.Purchase> list) {
-//                NTLog.d("queryPurchasesAsync billingResult.toString() : " + billingResult.toString());
+//                LGLog.d("queryPurchasesAsync billingResult.toString() : " + billingResult.toString());
 //
 //                for ( com.android.billingclient.api.Purchase PurchasesResult : list ) {
 //
-//                    NTLog.d("Consume PurchasesResult.toString() : " + PurchasesResult.toString());
+//                    LGLog.d("Consume PurchasesResult.toString() : " + PurchasesResult.toString());
 //                    ConsumeParams consumeParams = ConsumeParams.newBuilder()
 //                            .setPurchaseToken(PurchasesResult.getPurchaseToken())
 //                            .build();
@@ -627,19 +627,19 @@ public class PurchaseSub implements PurchasesUpdatedListener
 
     public static void SaveLocalData( String jKey, String jData )
     {
-        NTLog.d("Purchase.java SaveLocalData jKey : " + jKey + " jData : " + jData);
+        LGLog.d("Purchase.java SaveLocalData jKey : " + jKey + " jData : " + jData);
         GetInstance().SetSharedPreferencesData(jKey, jData);
     }
 
     public static String LoadLocalData( String jKey )
     {
-        NTLog.d("Purchase.java LocalData jKey : " + jKey);
+        LGLog.d("Purchase.java LocalData jKey : " + jKey);
         return GetInstance().GetSharedPreferencesData(jKey);
     }
 
     public static void RemoveLocalData( String jKey )
     {
-        NTLog.d("Purchase.java RemoveLocalData jKey : " + jKey);
+        LGLog.d("Purchase.java RemoveLocalData jKey : " + jKey);
         GetInstance().RemoveSharedPreferencesData(jKey);
     }
 
@@ -656,12 +656,12 @@ public class PurchaseSub implements PurchasesUpdatedListener
         {
             e.printStackTrace();
             result_msg = e.getMessage();
-            NTLog.e(result_msg);
+            LGLog.e(result_msg);
         }
 
         if (userCB != noCB)
         {
-            NTLog.d("Invoke() status : " + result_status + " msg : " + jsonResult.toString() + " userCB : " + userCB  );
+            LGLog.d("Invoke() status : " + result_status + " msg : " + jsonResult.toString() + " userCB : " + userCB  );
             nativeCB( result_status, jsonResult.toString(), userCB );
         }
     }
@@ -671,7 +671,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
         if (mMainActivity == null)
         {
             result_msg = "CheckInitlized() mMainActivity is null.";
-            NTLog.e(result_msg);
+            LGLog.e(result_msg);
             result_status = "UNKNOWN";
             result_ResponseCode = -1;
             GetInstance().Invoke( result_status, new JSONArray(), result_msg, result_ResponseCode , userCB );
@@ -681,7 +681,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
         if ( !IsConnected() )
         {
             result_msg = "Purchase is not ready. First Call Connect() API.";
-            NTLog.e(result_msg);
+            LGLog.e(result_msg);
             GetInstance().Invoke( result_status, new JSONArray(), result_msg, result_ResponseCode , userCB );
             return false;
         }
@@ -715,7 +715,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
     {
         SharedPreferences prefs = mMainActivity.getPreferences(Context.MODE_PRIVATE);
         String jsLoadData = prefs.getString(jKey, "");
-        NTLog.d("Purchase.java jKey = " + jKey + " jsLoadData : " + jsLoadData);
+        LGLog.d("Purchase.java jKey = " + jKey + " jsLoadData : " + jsLoadData);
         return prefs.getString(jKey, "");
     }
 
@@ -752,19 +752,19 @@ public class PurchaseSub implements PurchasesUpdatedListener
             while (temp_json.length() > 0) {
 
                 if (temp_json.length() > limitedline) {
-                    NTLog.d("log - " + log_index + " : "
+                    LGLog.d("log - " + log_index + " : "
                             + temp_json.substring(0, limitedline));
                     temp_json = temp_json.substring(limitedline);
                     log_index++;
                 } else {
-                    NTLog.d(temp_json);
+                    LGLog.d(temp_json);
                     break;
                 }
             }
         } catch (Exception e)
         {
             e.printStackTrace();
-            NTLog.e(result_msg);
+            LGLog.e(result_msg);
         }
     }
 
@@ -773,7 +773,7 @@ public class PurchaseSub implements PurchasesUpdatedListener
     //    Not Use 2020/08/06 LSS    //
     public void GetPurchaseHistory()
     {
-        NTLog.d("GetPurchaseHistory() start" );
+        LGLog.d("GetPurchaseHistory() start" );
 
         if ( !CheckInitlized( noCB ) ) return;
 
@@ -783,8 +783,8 @@ public class PurchaseSub implements PurchasesUpdatedListener
 
                 for (PurchaseHistoryRecord historyPurchase : list)
                 {
-                    NTLog.d("History purchase getOriginalJson : " + historyPurchase.getOriginalJson());
-                    NTLog.d("History purchase getSignature : " + historyPurchase.getSignature());
+                    LGLog.d("History purchase getOriginalJson : " + historyPurchase.getOriginalJson());
+                    LGLog.d("History purchase getSignature : " + historyPurchase.getSignature());
                 }
             }
         });

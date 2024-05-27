@@ -1,12 +1,14 @@
 #include <jni.h>
 #include <string>
 #include <android/log.h>
+#include <ncm/jni.h>
 #define LOG_TAG "NTSDK"
 #define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG , LOG_TAG, __VA_ARGS__)
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO , LOG_TAG, __VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN , LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR , LOG_TAG, __VA_ARGS__)
+using namespace NCM;
 
 extern "C" JNIEXPORT jstring JNICALL Java_com_linegames_ct2_MainActivity_stringFromJNI(
         JNIEnv *env,
@@ -117,7 +119,10 @@ extern "C" JNIEXPORT void JNICALL Java_com_linegames_Purchase_nativeCB(
         jlong userCB) {
     const char *str_status = env->GetStringUTFChars(status, NULL);
     const char *str_msg = env->GetStringUTFChars(msg, NULL);
-    //LOGD("^^^^ Purchase Native CB status %s msg %s userCB %ld ^^^^", str_status, str_msg, userCB);
+
+    JNI& jni = JNI::Ins();
+    jclass cls = jni.FindClass("com/linegames/Purchase");
+    LOGD("^^^^ Purchase Native CB status %s msg %s userCB %ld ^^^^", str_status, str_msg, userCB);
 }
 
 extern "C" JNIEXPORT void JNICALL Java_com_linegames_PurchaseSub_nativeCB(

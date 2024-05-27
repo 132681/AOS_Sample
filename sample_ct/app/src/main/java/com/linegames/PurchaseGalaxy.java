@@ -9,7 +9,8 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import android.util.Log;
 
-import com.linegames.base.NTBase;
+import com.linegames.base.LGBase;
+import com.linegames.base.LGLog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -81,7 +82,7 @@ public class PurchaseGalaxy
         Debug( "Connect() Galaxy userCB  (Galaxy) :" + userCB + " jProductMode : " + jProductMode);
 
         mProductMode = jProductMode;
-        mMainActivity = NTBase.getMainActivity();
+        mMainActivity = LGBase.getMainActivity();
 
         IAP_MODE = OperationMode.OPERATION_MODE_PRODUCTION;
         if (jProductMode.equals("sandbox"))
@@ -574,7 +575,7 @@ public class PurchaseGalaxy
     private static boolean CheckInitlized( long userCB )
     {
         if ( mMainActivity == null )
-            mMainActivity = NTBase.getMainActivity();
+            mMainActivity = LGBase.getMainActivity();
 
         result_status = "UNKNOWN";
         result_ResponseCode = -1;

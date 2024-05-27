@@ -25,8 +25,8 @@ import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.ProductDetailsResponseListener;
-import com.linegames.base.NTBase;
-import com.linegames.base.NTLog;
+import com.linegames.base.LGBase;
+import com.linegames.base.LGLog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -104,7 +104,7 @@ public class DFPurchase
 
         };
 
-        m_billingClient = BillingClient.newBuilder(NTBase.getMainActivity())
+        m_billingClient = BillingClient.newBuilder(LGBase.getMainActivity())
                 .setListener(purchasesUpdatedListener)
                 .enablePendingPurchases()
                 .build();
@@ -307,7 +307,7 @@ public class DFPurchase
                     .build();
 
 
-            BillingResult responseCode = m_billingClient.launchBillingFlow(NTBase.getMainActivity(), billingFlowParams);
+            BillingResult responseCode = m_billingClient.launchBillingFlow(LGBase.getMainActivity(), billingFlowParams);
             if( responseCode.getResponseCode() != BillingClient.BillingResponseCode.OK )
             {
                 m_isPurchasingComplete1 = true;
@@ -427,7 +427,7 @@ public class DFPurchase
         m_billingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(), new PurchasesResponseListener() {
             @Override
             public void onQueryPurchasesResponse(BillingResult billingResult, List<com.android.billingclient.api.Purchase> list) {
-                NTLog.d("queryPurchasesAsync billingResult.toString() : " + billingResult.toString());
+                LGLog.d("queryPurchasesAsync billingResult.toString() : " + billingResult.toString());
                 if( billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK )
                 {
                     return;
@@ -435,7 +435,7 @@ public class DFPurchase
 
                 for ( com.android.billingclient.api.Purchase PurchasesResult : list ) {
 
-                    NTLog.d("Consume PurchasesResult.toString() : " + PurchasesResult.toString());
+                    LGLog.d("Consume PurchasesResult.toString() : " + PurchasesResult.toString());
                     ConsumeParams consumeParams = ConsumeParams.newBuilder()
                             .setPurchaseToken(PurchasesResult.getPurchaseToken())
                             .build();
@@ -467,7 +467,7 @@ public class DFPurchase
             @Override
             public void onQueryPurchasesResponse(BillingResult billingResult, List<com.android.billingclient.api.Purchase> list) {
                 m_restoreList = list;
-                NTLog.d("LoadRestoreInfo queryPurchasesAsync count : " + m_restoreList.size());
+                LGLog.d("LoadRestoreInfo queryPurchasesAsync count : " + m_restoreList.size());
             }
         });
     }
@@ -478,7 +478,7 @@ public class DFPurchase
         {
             m_billingClient.endConnection();
             m_billingClient = null;
-            NTLog.i("Connection DisConnect" );
+            LGLog.i("Connection DisConnect" );
         }
     }
 

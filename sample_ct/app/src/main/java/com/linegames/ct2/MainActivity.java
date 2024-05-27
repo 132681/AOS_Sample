@@ -2,22 +2,19 @@ package com.linegames.ct2;
 
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.billingclient.api.SkuDetails;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.games.SnapshotsClient;
@@ -26,34 +23,31 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.linecorp.linesdk.auth.LineLoginApi;
 import com.linecorp.linesdk.auth.LineLoginResult;
-import com.linegames.AndroidPermission;
-import com.linegames.DeviceInfo;
 import com.linegames.Line;
-import com.linegames.NTAdjust;
 import com.linegames.Purchase;
-import com.linegames.PurchaseSub;
 import com.linegames.PurchaseGalaxy;
 import com.linegames.auth.Facebook;
-import com.linegames.base.NTBase;
-import com.linegames.base.NTLog;
-import com.linegames.DFPurchase;
+import com.linegames.base.LGBase;
 import com.linegames.Google;
-
-import org.json.JSONArray;
-import org.json.JSONException;
+import com.linegames.base.LGLog;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
+
+import org.json.JSONException;
 
 public class MainActivity extends Activity
 {
+    private ViewPager2 viewPager;
+    private MyPagerAdapter pagerAdapter;
+    private List<String> titles;
+
     private static final String TAG = "NTSDK";
     public static String PurchaseConsumeProductId = "cointop2_google_play_gem100";
     public static String ConsumeProductId1 = "cointop2_google_play_gem100";
@@ -67,660 +61,410 @@ public class MainActivity extends Activity
     private static final int PERMISSIONS_REQUEST = 0x0000001;
     public static final int RC_SIGN_IN_GOOGLE_SIGN_IN = 1001;
     public static final int RC_SIGN_IN_GOOGLE_PLAY_SERVICES_SIGN_IN = 1002;
-    //permission
+
+    public static TextView infoTextView;
 
     private static String GalaxyPid = "ct_samsung_apps_gem100"; //ct_samsung_apps_gem300 ct_samsung_apps_gem500
 
     static {
         System.loadLibrary("native-lib");
+//        System.loadLibrary("LGSDK");
     }
+
+    public String getSelectedProductId() {
+        return selectedProductId;
+    }
+
+    public void setSelectedProductId(String selectedProductId) {
+        this.selectedProductId = selectedProductId;
+    }
+
+    private String selectedProductId = "cointop2_google_play_gem100";
+
+
     public native String stringFromJNI();
     //public native String LoginReciever(int status, String jsAccessToken, String jsMsg);
     //@JvmStatic external fun LoginReciever( status : Int, jsFBID : String, jsAccessToken : String, jsMsg : String )
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView( R.layout.activity_main );
+        setContentView(R.layout.activity_main);
 
         Log.d(TAG, "stringFromJNI : " + stringFromJNI());
 
-        NTBase.getInstance().onCreate( this );
+        LGBase.getInstance().onCreate( this );
 
         Google.GetInstance().StartGoogleSign();
 
         int targetSdkVersion = getApplicationContext().getApplicationInfo().targetSdkVersion;
         Log.d(TAG, "targetSdkVersion : " + targetSdkVersion);
 
-        Button btn1 = (Button) this.findViewById(R.id.button1);
-        btn1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "adjustinit");
-                NTAdjust.Companion.Init("kz6rk49tznr4", "", "sandbox",1,665017812,845755228,363896731,1903830666);
-               // testFunc();
-            }
-        });
+        titles = new ArrayList<>();
+        titles.add("Google");
+        titles.add("Purchase");
+        titles.add("Adjust");
+        titles.add("UMG");
+        titles.add("ETC1_");
+        titles.add("ETC2_");
 
-        int orderIdData = 0;
-        Button btn2 = (Button) this.findViewById(R.id.button2);
-        btn2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "adjustevent1");
-                String jToken1 = "xm779b";
-                String jNull = "";    //1593404419905006435
-                String jNid = "ct_nid";
-                String jGnid = "ct_gnid";
-                String jGameServerID = "CT-KR-01";
-                String jOrderId = jNull;
-                String jCurrencyType = jNull;
-                int amount = 0;
-                NTAdjust.Companion.TrackEvent(jToken1, jNid, jGnid, jGameServerID, jOrderId, jCurrencyType, amount);
-            }
-        });
+        viewPager = findViewById(R.id.viewPager);
 
-        Button btn3 = (Button) this.findViewById(R.id.button3);
-        btn3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "adjustevent2");
-                String jToken2 = "27n0xy";
-                String jNull = "";    //1593404419905006435
-                String jNid = jNull;
-                String jGnid = jNull;
-                String jGameServerID = "CT-KR-01";
-                String jOrderId = "orderId2";
-                String jCurrencyType = "JPY";
-                int amount = 1000;
-                NTAdjust.Companion.TrackEvent(jToken2, jNid, jGnid, jGameServerID, jOrderId, jCurrencyType, amount);
-            }
-        });
+        pagerAdapter = new MyPagerAdapter(titles, viewPager);
+        viewPager.setAdapter(pagerAdapter);
 
-        Button btn4 = (Button) this.findViewById(R.id.button4);
-        btn4.setOnClickListener(new View.OnClickListener() {
+        viewPager.setCurrentItem(titles.size() * 1000, false);
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onClick(View view) {
-                Log.d(TAG, "AdjustAdid");
-                NTAdjust.Companion.GetAdjustAdid();
-            }
-        });
-        Button btn5 = (Button) this.findViewById(R.id.button5);
-        btn5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "GPS_Adid");
-                NTAdjust.Companion.GetAdid();
-                DeviceInfo.Companion.AOSDeviceInfo ();
-            }
-        });
-
-        Button btn6 = (Button) this.findViewById(R.id.button6);
-        btn6.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "btn6 facebook init");
-            }
-        });
-        Button btn7 = (Button) this.findViewById(R.id.button7);
-        btn7.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "btn7 facebook login");
-                String[] s_array = {"public_profile","email"};
-                Facebook.Companion.getInstance().Login(s_array);
-
-            }
-        });
-        Button btn8 = (Button) this.findViewById(R.id.button8);
-        btn8.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "btn8");
-                Log.d(TAG, "btn7 facebook logout");
-                Facebook.Companion.getInstance().Logout();
-              //  Purchase.Companion.getInstance().AdjustInit("gxi7w15gal8g","sandbox",0,0,0,0,0);
-
-                //                NTFacebook.Companion.getGetInstance().GetMe();
-//                Purchase.Companion.getInstance().AdjustTrackEvent("xm779b","11111111","222222222","ASIA","","",0);
-//                Purchase.Companion.getInstance().AdjustTrackEvent("27n0xy","11111111","222222222","ASIA","","",0);
-
-            }
-        });
-        Button btn9 = (Button) this.findViewById(R.id.button9);
-        btn9.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "btn9");
-//                NTFacebook.Companion.getGetInstance().GetFriendList();
-              //  Purchase.Companion.getInstance().AdjustTrackEvent("jzygrh","11111111","222222222","ASIA","","",0);
-            }
-        });
-        Button btn10 = (Button) this.findViewById(R.id.button10);
-        btn10.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-            Log.d(TAG, "btn10");
-            }
-        });
-        Button btn11 = (Button) this.findViewById(R.id.button11);
-        btn11.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Init");
-                Line.Companion.Init(111);
-            }
-        });
-        Button btn12 = (Button) this.findViewById(R.id.button12);
-        btn12.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Login");
-                //cointop 1653386472
-                //samples 1636568237
-                Line.Companion.Login("1653386472", 111);
-//                Line.Companion.Login("1653386472", 111);
-            }
-        });
-        Button btn13 = (Button) this.findViewById(R.id.button13);
-        btn13.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Logout");
-                Line.Companion.Logout();
-            }
-        });
-        Button btn14 = (Button) this.findViewById(R.id.button14);
-        btn14.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Profile");
-                Line.Companion.Profile(111);
-            }
-        });
-        Button btn15 = (Button) this.findViewById(R.id.button15);
-        btn15.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Verify");
-                Line.Companion.Verify(111);
-            }
-        });
-        Button btn16 = (Button) this.findViewById(R.id.button16);
-        btn16.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Refresh");
-                Line.Companion.Refresh(111);
-            }
-        });
-        Button btn17 = (Button) this.findViewById(R.id.button17);
-        btn17.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Connect");
-                Purchase.GetInstance().Connect("",111);
-//                PurchaseSub.GetInstance().Connect("",111);
-            }
-        });
-        Button btn18 = (Button) this.findViewById(R.id.button18);
-        btn18.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "GetProductList");
-
-                List<String> skuList = new ArrayList<String>();
-                //skuList.add("ct_floor_store_gem500");
-                     //        cointop2_google_play_gem300
-                skuList.add("cointop2_google_play_gem100");
-                skuList.add("cointop2_google_play_gem300");
-                skuList.add("cointop2_google_play_gem500");
-//                skuList.add("cointop2_google_play_gem100000");
-//                skuList.add("cointop2_google_play_gem100_sub");
-//                skuList.add("cointop2_google_play_gem10000044");
-//                for (int i = 0; i < 10; i++)
-//                {
-//                    String pid = "cointop_google_play_gem10" + i;
-//                    skuList.add(pid);
-//                }
-//                for (int i = 0; i < 10; i++)
-//                {
-//                    String pid = "cointop_google_play_gem30" + i;
-//                    skuList.add(pid);
-//                }
-//                for (int i = 0; i < 3; i++)
-//                {
-//                    String pid = "cointop_google_play_gem501" + i;
-//                    skuList.add(pid);
-//                }
-                String[] pidArray = skuList.toArray(new String[skuList.size()]);
-
-                for (String pid : pidArray)
-                {
-                    Purchase.GetInstance().RegisterProduct (pid);
-                }
-
-                //dropBos 초기화
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(NTBase.getMainActivity(), android.R.layout.simple_spinner_dropdown_item, pidArray);
-
-                Spinner spinner = findViewById(R.id.spinner);
-                spinner.setAdapter(adapter);
-                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        // 선택된 항목을 가져옴
-                        String selectedItem = (String) parent.getItemAtPosition(position);
-                        // 선택된 항목을 Toast 메시지로 표시
-                        PurchaseConsumeProductId = selectedItem;
-                        Toast.makeText(MainActivity.this, "Selected: " + selectedItem, Toast.LENGTH_SHORT).show();
+            public void onPageScrollStateChanged(int state) {
+                super.onPageScrollStateChanged(state);
+                if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                    int currentPosition = viewPager.getCurrentItem();
+                    int lastReal = pagerAdapter.getItemCount() - 1;
+                    if (currentPosition == 0) {
+                        viewPager.setCurrentItem(lastReal - 1, false);
+                    } else if (currentPosition == lastReal) {
+                        viewPager.setCurrentItem(1, false);
                     }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                        // 아무 항목도 선택되지 않았을 때의 동작 정의 (필요 시)
-                    }
-                });
-
-                Purchase.GetInstance().RefreshProductInfo (111);
-//                PurchaseSub.GetInstance().RefreshProductInfo (111);
-            }
-        });
-        Button btn19 = (Button) this.findViewById(R.id.button19);
-        btn19.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "BuyProduct");
-                Purchase.GetInstance().BuyProduct(PurchaseConsumeProductId, PurchaseConsumeProductId +".414132124.uwo_kr_server1", 11);
-            }
-        });
-
-        Button btn35 = (Button) this.findViewById(R.id.button35);
-        btn35.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "BuyProductSub");
-//                String payloadTest = "abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz_abcdefghij_";
-                try {
-                    Purchase.GetInstance().sendEmailToAdmin();
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
                 }
             }
         });
-
-        Button btn20 = (Button) this.findViewById(R.id.button20);
-        btn20.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Consume");
-                try {
-                    Purchase.GetInstance().Consume(PurchaseConsumeProductId,111);
-//                    PurchaseSub.GetInstance().Consume(ConsumeProductId1Sub,111);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                //                Purchase.GetInstance().Consume("cointop_google_play_gem100",111);
-            }
-        });
-        Button btn21 = (Button) this.findViewById(R.id.button21);
-        btn21.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "ProductRestore");
-                Purchase.GetInstance().RestoreProduct(111);
-//                PurchaseSub.GetInstance().RestoreProduct(111);
-           }
-        });
-        Button btn22 = (Button) this.findViewById(R.id.button22);
-        btn22.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "ConsumeAll");
-                Purchase.GetInstance().ConsumeAll(111);
-//                PurchaseSub.GetInstance().ConsumeAll(111);
-//                Purchase.GetInstance().IsExistUnconsumedList();
-            }
-        });
-        Button btn23 = (Button) this.findViewById(R.id.button23);
-        btn23.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-//                Log.d(TAG, "Galaxy Connect");
-            }
-        });
-        Button btn24 = (Button) this.findViewById(R.id.button24);
-        btn24.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Galaxy Connect");
-                String productMode = "TEST";   //PRODUCT     FAILURE
-                PurchaseGalaxy.Connect(productMode, 111);
-            }
-        });
-        Button btn25 = (Button) this.findViewById(R.id.button25);
-        btn25.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Galaxy GetRefreshProduct");
-
-                List<String> skuList = new ArrayList<String>();
-                skuList.add("ct_samsung_apps_gem100");
-                skuList.add("ct_samsung_apps_gem300");
-                skuList.add("ct_samsung_apps_gem500");
-                String[] pidArray = skuList.toArray(new String[skuList.size()]);
-
-                for (String pid : pidArray)
-                {
-                    PurchaseGalaxy.RegisterProduct (pid);
-                }
-
-                PurchaseGalaxy.RefreshProductInfo(111);
-            }
-        });
-        Button btn26 = (Button) this.findViewById(R.id.button26);
-        btn26.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Galaxy BuyProduct");
-                StringBuilder orderId = new StringBuilder();
-                orderId.append(GalaxyPid);
-                orderId.append(".");
-                orderId.append(GalaxyPid);
-
-                PurchaseGalaxy.BuyProduct (GalaxyPid, orderId.toString(), 111);
-            }
-        });
-        Button btn27 = (Button) this.findViewById(R.id.button27);
-        btn27.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Galaxy Consume");
-                try {
-                    PurchaseGalaxy.Consume(GalaxyPid,111);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        Button btn28 = (Button) this.findViewById(R.id.button28);
-        btn28.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Galaxy ConsumeAll");
-                try {
-                    PurchaseGalaxy.ConsumeAll(111);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        Button btn29 = (Button) this.findViewById(R.id.button29);
-        btn29.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Galaxy RestoreProduct");
-                PurchaseGalaxy.RestoreProduct(111);
-            }
-        });
-        Button btn30 = (Button) this.findViewById(R.id.button30);
-        btn30.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "Galaxy 00");
-                //PurchaseGalaxy.GetInstance().GetPurchaseHistory();
-            }
-        });
-
-        Button btn31 = (Button) this.findViewById(R.id.button31);
-        btn31.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.S)
-            @Override
-            public void onClick(View view)
-            {
-                int targetSdkVersion = getApplicationContext().getApplicationInfo().targetSdkVersion;
-                int minSdkVersion = getApplicationContext().getApplicationInfo().minSdkVersion;
-                Log.d(TAG, "Android targetSdkVersion : " + targetSdkVersion);
-                Log.d(TAG, "Android minSdkVersion : " + minSdkVersion);
-
-                AndroidPermission.GetInstance().ShowRequestPermission();
-
-                Log.d(TAG, "AndroidPermission.GetInstance().ShowRequestPermission()");
-            }
-        });
-
-        Button btn32 = (Button) this.findViewById(R.id.button32);
-        btn32.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "GoogleSignin========================");
-                Google.GetInstance().GoogleSign();
-            }
-        });
-
-        Button btn33 = (Button) this.findViewById(R.id.button33);
-        btn33.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "GooglePlayServiceSignin========================");
-                Google.GetInstance().GooglePlayServiceSign();
-            }
-        });
-
-        Button btn34 = (Button) this.findViewById(R.id.button34);
-        btn34.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "GoogleSignOut========================");
-                Google.GetInstance().GoogleSignOut();
-            }
-        });
-
-        Button btn44 = (Button) this.findViewById(R.id.button44);
-        btn44.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "GoogleCloudList========================");
-                Google.GetInstance().signInSilently();
-            }
-        });
-
-        String SAVE_GAMENAME_1 = "SaveGame1";
-        String LOAD_SUNU = "CT_qa";
-        String gameData = "SUNU BABO~~~"; // 저장할 게임 데이터
-
-        String SAVE_GAMENAME_2 = "SaveGame2";
-        Button btn43 = (Button) this.findViewById(R.id.button43);
-        btn43.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "GoogleCloudSave========================");
-
-                Google.GetInstance().writeSnapshot(LOAD_SUNU, "NODATA", SAVE_GAMENAME_1)
-                        .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
-                            @Override
-                            public void onComplete(@NonNull Task<SnapshotMetadata> task) {
-                                if (task.isSuccessful()) {
-                                    // 게임 콘텐츠가 성공적으로 저장되었을 때의 처리
-                                    // 예를 들어, 사용자에게 저장 완료 메시지를 표시하거나 UI를 업데이트할 수 있습니다.
-                                    NTLog.d("","lss GoogleCloudSave Success : " + task.toString());
-                                } else {
-                                    // 저장이 실패한 경우 처리
-                                    Exception e = task.getException();
-                                    NTLog.d("","lss GoogleCloudSave Error : " + e.toString());
-                                    // 에러 메시지를 표시하거나 적절한 오류 처리를 수행합니다.
-                                }
-                            }
-                        });
-            }
-        });
-
-        Button btn36 = (Button) this.findViewById(R.id.button36);
-        btn36.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "GoogleCloudLoad========================");
-                Google.GetInstance().loadSnapshot(LOAD_SUNU).addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (task.isSuccessful()) {
-                            // 작업이 성공적으로 완료됐을 때
-                            String snapshotData = task.getResult();
-                            Log.d(TAG, "lss GoogleCloudLoad Success : " + snapshotData);
-                            // snapshotData를 사용하여 필요한 작업을 수행합니다.
-                        } else {
-                            // 작업이 실패했을 때
-                            Exception e = task.getException();
-                            // 실패 이유를 처리합니다.
-                            Log.d(TAG, "lss GoogleCloudLoad fail e : " + e.toString());
-                        }
-                    }
-                });
-            }
-        });
-
-        Button btn37 = (Button) this.findViewById(R.id.button37);
-        btn37.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "DF_Connect");
-                DFPurchase.Connect();
-            }
-        });
-
-        Button btn38 = (Button) this.findViewById(R.id.button38);
-        btn38.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "DF_RefreshProduct");
-//                DFPurchase.registerStoreProductID("df_for_kakao_google_play_22_03");
-//                DFPurchase.registerStoreProductID("df_for_kakao_google_play_20_14");
-//                DFPurchase.registerStoreProductID("cointop2_google_play_gem300");
-//                DFPurchase.registerStoreProductID("cointop2_google_play_gem500");
-//                DFPurchase.refreshStoreProductInfo();
-            }
-        });
-
-        Button btn39 = (Button) this.findViewById(R.id.button39);
-        btn39.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "DF_Purchase");
-                DFPurchase.requestPurchaseToGooglePlay("cointop2_google_play_gem300");
-            }
-        });
-
-        Button btn40 = (Button) this.findViewById(R.id.button40);
-        btn40.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "DF_Consume");
-                DFPurchase.IAP_RemoveReceipt();
-            }
-        });
-
-        Button btn41 = (Button) this.findViewById(R.id.button41);
-        btn41.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "DF_Test1");
-                DFPurchase.LoadRestoreInfo();
-            }
-        });
-
-        Button btn42 = (Button) this.findViewById(R.id.button42);
-        btn42.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Log.d(TAG, "DF_Test2");
-                try {
-                    Log.d(TAG, "IAP_GetSignature : " + DFPurchase.IAP_GetProductName());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                Log.d(TAG, "IAP_GetSignature : " + DFPurchase.IAP_GetSignature());
-                Log.d(TAG, "IAP_GetPurchaseData : " + DFPurchase.IAP_GetPurchaseData());
-                Log.d(TAG, "IAP_IsExistReceipt : " + DFPurchase.IAP_IsExistReceipt());
-            }
-        });
-
+        infoTextView = pagerAdapter.getInfoTextView(0);
+        if (infoTextView != null) {
+            infoTextView.setText("Updated Info Text");
+        }
     }
 
-    public void testFunc()
-    {
-        for (int j = 20; j < 100; j++) {
-            ArrayList<String> productIdArr = new ArrayList<>();
-            String jProductID = "";
-            int countNum = j;
-            for (int i = 0; i < countNum; i++) {
-                jProductID = "pId" + i;
-                productIdArr.add(jProductID);
+    // getSpinnerItems 메소드를 static으로 변경
+    public List<String> getSpinnerItems() {
+        List<String> items = new ArrayList<>();
+        items.add("cointop2_google_play_gem100");
+        items.add("cointop2_google_play_gem300");
+        items.add("cointop2_google_play_gem500");
+        items.add("cointop2_google_play_gem800");
+        return items;
+    }
+
+    public class MyPagerAdapter extends RecyclerView.Adapter<MyPagerAdapter.ViewHolder> {
+        private List<String> titles;
+        private ViewPager2 viewPager;
+        public MyPagerAdapter(List<String> titles, ViewPager2  viewPager) {
+            this.titles = titles;
+            this.viewPager = viewPager;
+        }
+
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_page, parent, false);
+            return new ViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            int virtualPosition = position % titles.size();
+            String title = titles.get(virtualPosition);
+            holder.titleTextView.setText(title);
+
+            // Set up spinner for Purchase page only
+            if (title.equals("Purchase")) {
+                holder.spinner.setVisibility(View.VISIBLE);
+            } else {
+                holder.spinner.setVisibility(View.GONE);
             }
 
-            final int inputProductsCount = productIdArr.size();
-            final int defaultCount = 20;
+            // Set infotextview based on page title
+            holder.infoTextView.setText(title);
+            // Set text information for each page
+            switch (title) {
+                case "Google":
+                    holder.infoTextView.setText("Google information");
+                    break;
+                case "Purchase":
+                    holder.infoTextView.setText("Purchase information");
+                    break;
+                case "Adjust":
+                    holder.infoTextView.setText("Adjust information");
+                    break;
+                case "UMG":
+                    holder.infoTextView.setText("UMG information");
+                    break;
+                case "ETC1":
+                    holder.infoTextView.setText("ETC1 information");
+                    break;
+                case "ETC2":
+                    holder.infoTextView.setText("ETC2 information");
+                    break;
+            }
 
-            NTLog.d("productIdArr.toString() : " + productIdArr.toString());
-            NTLog.d("productIdArr.size() : " + productIdArr.size());
+            // Set OnClickListener for each button
+            for (int i = 0; i < 10; i++) {
+                String buttonText = generateButtonText(title, i + 1); // Generate button text based on page title and button index
 
-            final JSONArray productsJsonArray = new JSONArray();
-            final ArrayList<String> invalidProductsId = productIdArr;
-            final int[] queryCompleteCounter = new int[] { 0 };
-            final int loopCnt = inputProductsCount / defaultCount;
-
-            for(int i = 0 ; i < loopCnt + 1; i++)
-            {
-                int fromIndex = i * defaultCount;
-                int toIndex = Math.min(inputProductsCount, ( i + 1 ) * defaultCount);
-
-               if (toIndex > productIdArr.size())
-                {
-                    NTLog.d(" =========================================================================== ");
-                    NTLog.d(" j : " + j + " toIndex : " + toIndex  + " productIdArr.size() : " + productIdArr.size() );
-                    NTLog.d(" =========================================================================== ");
-                    //continue;
+                Button button = null;
+                switch (i) {
+                    case 0:
+                        button = holder.addButton1;
+                        break;
+                    case 1:
+                        button = holder.addButton2;
+                        break;
+                    case 2:
+                        button = holder.addButton3;
+                        break;
+                    case 3:
+                        button = holder.addButton4;
+                        break;
+                    case 4:
+                        button = holder.addButton5;
+                        break;
+                    case 5:
+                        button = holder.addButton6;
+                        break;
+                    case 6:
+                        button = holder.addButton7;
+                        break;
+                    // Add cases for other buttons as needed
                 }
 
-                List<String> productsInfo = productIdArr.subList(i * defaultCount, toIndex);
-                NTLog.d(" fromIndex : " + fromIndex + " toIndex : " + toIndex );
-                NTLog.d(" j : " + j + " i : " + i + " loopCnt : " + loopCnt +  " productsInfo.size() : " + productsInfo.size() );
-                NTLog.d(" productsInfo.toString() : " + productsInfo.toString());
+                if (button != null) {
+                    button.setText(buttonText);
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Call corresponding class's function based on button text
+                            switch (title) {
+                                case "Google":
+                                    generateButtonText(buttonText, holder.infoTextView);
+                                    break;
+                                case "Purchase":
+                                    generateButtonText(buttonText, holder.infoTextView);
+                                    break;
+                                case "Adjust":
+                                    generateButtonText(buttonText, holder.infoTextView);
+                                    break;
+                                case "UMG":
+                                    generateButtonText(buttonText, holder.infoTextView);
+                                    break;
+                                case "ETC1":
+                                    generateButtonText(buttonText, holder.infoTextView);
+                                    break;
+                                case "ETC2":
+                                    generateButtonText(buttonText, holder.infoTextView);
+                                    break;
+                                // Add cases for other titles if needed
+                            }
+                        }
+                    });
+                }
             }
-
         }
+
+        private String generateButtonText(String title, int index) {
+            // Generate button text based on page title and button index
+            return title + " " + index;
+        }
+
+        private void generateButtonText(String buttonText, TextView infoTextView)  {
+            Log.d(TAG, "Google button clicked: " + buttonText );
+            switch (buttonText) {
+                case "Google 1":
+                    Google.GetInstance().GoogleSign();
+                    infoTextView.setText("GoogleSign");
+                    break;
+                case "Google 2":
+                    Google.GetInstance().GoogleSignOut();
+                    infoTextView.setText("GoogleSignOut");
+                    break;
+                case "Google 3":
+                    // 람다 표현식으로 GooglePlayServiceSign 사용
+                    Google.GetInstance().GooglePlayServiceSign( (success, playerId) -> {
+                        String resultStr = "Sign in failed.";
+                        if (success) {
+                            LGLog.d("", "Sign in successful! Player ID: " + playerId);
+                            resultStr = "Sign in successful! Player ID: " + playerId;
+                        } else {
+                            LGLog.d("", "Sign in failed.");
+                        }
+                        infoTextView.setText("GooglePlayServiceSign");
+                    });
+
+                    break;
+                case "Google 4":
+                    Google.GetInstance().signInSilently();
+                    infoTextView.setText("GoogleCloud List");
+                    break;
+                case "Google 5":
+                    Google.GetInstance().writeSnapshot(getString(R.string.SaveLoadName), getString(R.string.SaveData), getString(R.string.Desc))
+                            .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
+                                @Override
+                                public void onComplete(@NonNull Task<SnapshotMetadata> task) {
+                                    if (task.isSuccessful()) {
+                                        // 게임 콘텐츠가 성공적으로 저장되었을 때의 처리
+                                        // 예를 들어, 사용자에게 저장 완료 메시지를 표시하거나 UI를 업데이트할 수 있습니다.
+                                        LGLog.d("","lss GoogleCloudSave Success : " + task.toString());
+                                        infoTextView.setText("Success GoogleCloudSave");
+                                    } else {
+                                        // 저장이 실패한 경우 처리
+                                        Exception e = task.getException();
+                                        LGLog.d("","lss GoogleCloudSave Error : " + e.toString());
+                                        // 에러 메시지를 표시하거나 적절한 오류 처리를 수행합니다.
+                                        infoTextView.setText(" GoogleCloudSave Error : " + e.toString());
+                                    }
+                                }});
+                            break;
+                case "Google 6":
+                        Google.GetInstance().loadSnapshot(getString(R.string.SaveLoadName)).addOnCompleteListener(new OnCompleteListener<String>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<String> task) {
+                                        if (task.isSuccessful()) {
+                                            // 작업이 성공적으로 완료됐을 때
+                                            String snapshotData = task.getResult();
+                                            Log.d(TAG, "lss GoogleCloudLoad Success : " + snapshotData);
+                                            // snapshotData를 사용하여 필요한 작업을 수행합니다.
+                                            infoTextView.setText("Success GoogleCloudLoad : " + snapshotData);
+                                        } else {
+                                            // 작업이 실패했을 때
+                                            Exception e = task.getException();
+                                            // 실패 이유를 처리합니다.
+                                            Log.d(TAG, "lss GoogleCloudLoad Error e : " + e.toString());
+                                            infoTextView.setText("GoogleCloudLoad Error : " + e.toString());
+                                        }
+                                    }
+                                });
+                            break;
+                case "Purchase 1":
+                    Purchase.GetInstance().Connect("", 111);
+                    //infoTextView.setText("Google information");
+                    break;
+                case "Purchase 2":
+                    List<String> spinnerItems = getSpinnerItems();
+                    for (String item : spinnerItems) {
+                        Log.d(TAG, "Purchase 2 Spinner Item: " + item);
+                        Purchase.GetInstance().RegisterProduct(item);
+                    }
+                    Purchase.GetInstance().RefreshProductInfo( 111);
+                    break;
+                case "Purchase 3":
+                    Purchase.GetInstance().BuyProduct(getSelectedProductId(), "", 111);
+                    break;
+                case "Purchase 4":
+                    try {
+                        Purchase.GetInstance().Consume(getSelectedProductId(),111);
+                    } catch (Exception e)
+                    {
+
+                    }
+                    break;
+                case "Purchase 5":
+                    Purchase.GetInstance().RestoreProduct (111);
+                    break;
+                case "Purchase 6":
+                    Purchase.GetInstance().ConsumeAll(111);
+                    break;
+                case "Adjust 1":
+                    break;
+                case "Adjust 2":
+                    break;
+                case "Adjust 3":
+                    break;
+                case "Adjust 4":
+                    break;
+                case "Adjust 5":
+                    break;
+                case "Adjust 6":
+                    break;
+                case "UMG 1":
+                    break;
+                case "UMG 2":
+                    break;
+                case "UMG 3":
+                    break;
+                case "UMG 4":
+                    break;
+                case "UMG 5":
+                    break;
+                case "UMG 6":
+                    break;
+                default:
+                    // Login canceled due to other error
+            }
+        }
+
+        //        private void handleGoogleButtonClick(String buttonText, TextView infoTextView) {
+//            Log.d(TAG, "Google button clicked: " + buttonText);
+//        }
+
+        @Override
+        public int getItemCount() {
+            return titles.size() * 1000; // Infinite scrolling effect
+        }
+
+        public TextView getInfoTextView(int position) {
+            RecyclerView recyclerView = (RecyclerView) viewPager.getChildAt(0);
+            RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(position);
+            if (viewHolder != null) {
+                return ((ViewHolder) viewHolder).infoTextView;
+            } else {
+                return null;
+            }
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            TextView titleTextView;
+            TextView infoTextView;
+            Spinner spinner;
+            Button addButton1, addButton2, addButton3, addButton4, addButton5, addButton6, addButton7; // Add more buttons if needed
+
+            public ViewHolder(@NonNull View itemView) {
+                super(itemView);
+                titleTextView = itemView.findViewById(R.id.titleTextView);
+                infoTextView = itemView.findViewById(R.id.infoTextView); // Initialize infoTextView
+                addButton1 = itemView.findViewById(R.id.addButton1);
+                addButton2 = itemView.findViewById(R.id.addButton2);
+                addButton3 = itemView.findViewById(R.id.addButton3);
+                addButton4 = itemView.findViewById(R.id.addButton4);
+                addButton5 = itemView.findViewById(R.id.addButton5);
+                addButton6 = itemView.findViewById(R.id.addButton6);
+                addButton7 = itemView.findViewById(R.id.addButton7);
+
+                spinner = itemView.findViewById(R.id.spinner); // 스피너 초기화
+
+                if (spinner != null) {
+                    // Spinner에 어댑터 설정
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(itemView.getContext(),
+                            android.R.layout.simple_spinner_item, getSpinnerItems());
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinner.setAdapter(adapter);
+
+                    // 새로운 코드 추가
+                    spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            if (parent != null) {
+                                setSelectedProductId(parent.getItemAtPosition(position).toString());
+                                Toast.makeText(itemView.getContext(), parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+                            // 아무 것도 하지 않음
+                        }
+                    });
+                } else {
+                    Log.e("ViewHolder", "Spinner not found");
+                }
+
+            }
+        }
+//        private static List<String> getSpinnerItems() {
+//            List<String> items = new ArrayList<>();
+//            items.add("cointop2_google_play_gem100");
+//            items.add("cointop2_google_play_gem300");
+//            items.add("cointop2_google_play_gem500");
+//            return items;
+//        }
     }
 
     @Override
@@ -858,11 +602,11 @@ public class MainActivity extends Activity
 //        Log.e( "NTSDK", "@@@@@@@@@@@@  Start 1 @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 //        PurchaseGalaxy.RefreshProductInfo(111);
 
-        if (NTBase.getMainActivity() == null)
+        if (LGBase.getMainActivity() == null)
             Log.i( "NTSDK", "1 Activity is null.");
         super.onStop();
 
-        if (NTBase.getMainActivity() == null)
+        if (LGBase.getMainActivity() == null)
             Log.i( "NTSDK", "2 Activity is null.");
 
         Log.e( "NTSDK", "@@@@@@@@@@@@  onStop @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
@@ -875,7 +619,6 @@ public class MainActivity extends Activity
     {
         super.onDestroy();
         Log.e( "NTSDK", "@@@@@@@@@@@@  onDestroy @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        Purchase.GetInstance().OnDestory();
         PurchaseGalaxy.GetInstance().OnDestory();
     }
 

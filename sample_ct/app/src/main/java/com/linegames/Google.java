@@ -29,8 +29,11 @@ import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Tasks;
-import com.linegames.base.NTLog;
+import com.linegames.base.LGLog;
 
+
+import com.linegames.base.LGBase;
+import com.linegames.base.LGLog;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -41,7 +44,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
-import com.linegames.base.NTBase;
+import com.linegames.base.LGLog;
 import com.linegames.ct2.MainActivity;
 
 //import com.google.android.gms.games.snapshot.SnapshotCoordinator;
@@ -79,7 +82,7 @@ public class Google extends Activity
             synchronized ( Google.class ) {
                 if ( getInstance == null )
                     getInstance = new Google();
-                    mMainActivity = NTBase.getMainActivity();
+                    mMainActivity = LGBase.getMainActivity();
                     //PlayGamesSdk.initialize(mMainActivity);
 
             }
@@ -89,26 +92,26 @@ public class Google extends Activity
 
     public void StartGoogleSign()
     {
-        NTLog.d("", "lss =================== StartGoogleSign ==================");
+        LGLog.d("", "lss =================== StartGoogleSign ==================");
         GoogleSignInOptions gs = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestId()
                 .requestEmail()
                 .build();
 
         if (mGoogleSignInClient == null)
-            mMainActivity = NTBase.getMainActivity();
+            mMainActivity = LGBase.getMainActivity();
 
         mGoogleSignInClient = GoogleSignIn.getClient(mMainActivity, gs);
 
         if (mGoogleSignInClient == null)
-            NTLog.d("lss ================= mGoogleSignInClient is null ===================");
+            LGLog.d("lss ================= mGoogleSignInClient is null ===================");
         else
-            NTLog.d("lss =================  mGoogleSignInClient is not null ===================");
+            LGLog.d("lss =================  mGoogleSignInClient is not null ===================");
     }
 
     public void StartGooglePlayGamesSdk()
     {
-        NTLog.d("lss ================= StartGooglePlayGamesSdk ===================");
+        LGLog.d("lss ================= StartGooglePlayGamesSdk ===================");
         PlayGamesSdk.initialize(mMainActivity);
     }
 
@@ -116,20 +119,29 @@ public class Google extends Activity
     {
         if (isGoogleSign)
         {
-            Google.GetInstance().StartGoogleSign();
+//            Google.GetInstance().StartGoogleSign();
 
             GoogleSign();
         }
         else
         {
            // StartGooglePlayGamesSdk();
-            GooglePlayServiceSign();
+            GooglePlayServiceSign((success, playerId) -> {
+               if (success)
+               {
+
+               }
+               else
+               {
+
+               }
+            });
         }
     }
 
     public void GoogleSign()
     {
-        NTLog.d("","lss GoogleSign");
+        LGLog.d("","lss GoogleSign");
         mGoogleSignInClient.silentSignIn().addOnCompleteListener( mMainActivity,new OnCompleteListener<GoogleSignInAccount>()
                 {
                     @Override
@@ -137,15 +149,15 @@ public class Google extends Activity
                     {
                         if( taskAuth.isSuccessful() )
                         {
-                            NTLog.d("","lss Google: SilentSignIn success " + taskAuth.getResult().toString() );
+                            LGLog.d("","lss Google: SilentSignIn success " + taskAuth.getResult().toString() );
                             String userid = taskAuth.getResult().getId();
                             String token = taskAuth.getResult().getIdToken();
-                            NTLog.d("","lss userid : " + userid );
-                            NTLog.d("","lss token : " + token );
+                            LGLog.d("","lss userid : " + userid );
+                            LGLog.d("","lss token : " + token );
                         }
                         else
                         {
-                            NTLog.d("","lss Google: SilentSignIn Fail" );
+                            LGLog.d("","lss Google: SilentSignIn Fail" );
 
                             Intent signInIntent = mGoogleSignInClient.getSignInIntent();
                             mMainActivity.startActivityForResult(signInIntent, MainActivity.RC_SIGN_IN_GOOGLE_SIGN_IN);
@@ -154,10 +166,13 @@ public class Google extends Activity
                 });
 
     }
-
-    public void GooglePlayServiceSign()
+    @FunctionalInterface
+    public interface GooglePlayServiceSignCallback {
+        void signInComplete(boolean success, String playerId);
+    }
+    public void GooglePlayServiceSign(GooglePlayServiceSignCallback callback)
     {
-        NTLog.d("","lss GooglePlayServiceSign");
+        LGLog.d("","lss GooglePlayServiceSign");
 
         GamesSignInClient gamesSignInClient = PlayGames.getGamesSignInClient(mMainActivity);
 
@@ -166,23 +181,23 @@ public class Google extends Activity
             boolean isAuthenticated = (isAuthenticatedTask.isSuccessful() && isAuthenticatedTask.getResult().isAuthenticated());
             if (isAuthenticated) {
                 // Continue with Play Games Services
-                NTLog.d("","lss GooglePlayServiceSign Continue with Play Games Services");
-                OnGooglePlayServiceResult(gamesSignInClient);
+                LGLog.d("","lss GooglePlayServiceSign Continue with Play Games Services");
+                OnGooglePlayServiceResult(gamesSignInClient, callback);
 
             } else {
-                NTLog.d("","lss GooglePlayServiceSign.signIn() Not Logined");
+                LGLog.d("","lss GooglePlayServiceSign.signIn() Not Logined");
                 gamesSignInClient.signIn().addOnCompleteListener(mMainActivity, new OnCompleteListener<AuthenticationResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthenticationResult> task) {
                         gamesSignInClient.isAuthenticated().addOnCompleteListener(isAuthenticatedTask -> {
                             if ( isAuthenticatedTask.isSuccessful() && isAuthenticatedTask.getResult().isAuthenticated() )
                             {
-                                NTLog.d("","lss Google Play Service Login success");
-                                OnGooglePlayServiceResult(gamesSignInClient);
+                                LGLog.d("","lss Google Play Service Login success");
+                                OnGooglePlayServiceResult(gamesSignInClient, callback);
                             }
                             else
                             {
-                                NTLog.d("","lss Google Play Service Login Cancel");
+                                LGLog.d("","lss Google Play Service Login Cancel");
                             }
                         });
                     }
@@ -192,32 +207,36 @@ public class Google extends Activity
         });
     }
 
-    public void OnGooglePlayServiceResult(GamesSignInClient gamesSignInClient)
-    {
-        gamesSignInClient.requestServerSideAccess(webClientId, /*forceRefreshToken=*/ false)
-                .addOnCompleteListener( task -> {
-                    if (task.isSuccessful())
-                    {
-                        PlayGames.getPlayersClient(mMainActivity).getCurrentPlayer().addOnCompleteListener(mTask -> {
-                            // Get PlayerID with mTask.getResult().getPlayerId()
-                            NTLog.d("","lss call GamesSignInClient.signIn()nnn");
-                            //NTLog.d("","lss Email : " +  task.getResult().);
-                            NTLog.d("","lss id : " +  "");
-                            NTLog.d("","lss displayName : " +  mTask.getResult().getDisplayName());
-                            NTLog.d("","lss idToken : " +  "");
-                            NTLog.d("","lss familyName : " +  "");
-                            NTLog.d("","lss givenName : " +  "");
-                            NTLog.d("","lss photoUrl : " +  mTask.getResult().getIconImageUri());
-                            NTLog.d("","lss getserverAuthCode : " +  task.getResult());
-                            NTLog.d("","lss playerId : " +  mTask.getResult().getPlayerId());
-                            NTLog.d("","lss mTask getResult : " +  mTask.getResult().toString());
-                        });
-                    } else {
-                        // Failed to retrieve authentication code.
-                        NTLog.d("","lss call requestServerSideAccess fail");
-                    }
-                });
+    public void OnGooglePlayServiceResult(GamesSignInClient gamesSignInClient, GooglePlayServiceSignCallback callback) {
+        {
+            gamesSignInClient.requestServerSideAccess(webClientId, /*forceRefreshToken=*/ false)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            PlayGames.getPlayersClient(mMainActivity).getCurrentPlayer().addOnCompleteListener(mTask -> {
+                                // Get PlayerID with mTask.getResult().getPlayerId()
+                                LGLog.d("", "lss call GamesSignInClient.signIn()nnn");
+                                //LGLog.d("","lss Email : " +  task.getResult().);
+                                LGLog.d("", "lss id : " + "");
+                                LGLog.d("", "lss displayName : " + mTask.getResult().getDisplayName());
+                                LGLog.d("", "lss idToken : " + "");
+                                LGLog.d("", "lss familyName : " + "");
+                                LGLog.d("", "lss givenName : " + "");
+                                LGLog.d("", "lss photoUrl : " + mTask.getResult().getIconImageUri());
+                                LGLog.d("", "lss getserverAuthCode : " + task.getResult());
+                                LGLog.d("", "lss playerId : " + mTask.getResult().getPlayerId());
+                                LGLog.d("", "lss mTask getResult : " + mTask.getResult().toString());
+                                callback.signInComplete(true, mTask.getResult().getPlayerId());
+                            });
+                        } else {
+                            // Failed to retrieve authentication code.
+                            LGLog.d("", "lss call requestServerSideAccess fail");
+                            callback.signInComplete(false, null);
+                        }
+                    });
+
+        }
     }
+
     public void GoogleSignOut()
     {
         mGoogleSignInClient.signOut()
@@ -226,7 +245,7 @@ public class Google extends Activity
                     public void onComplete(@NonNull Task<Void> task) {
                         // Sign out completed
                         //Toast.makeText(mMainActivity, "Signed out", Toast.LENGTH_SHORT).show();
-                        NTLog.d("","lss GoogleSignOut : " + task.isSuccessful());
+                        LGLog.d("","lss GoogleSignOut : " + task.isSuccessful());
                     }
                 });
 
@@ -234,32 +253,32 @@ public class Google extends Activity
 
     public void GooglePlayServiceSignOut()
     {
-        NTLog.d("","lss GooglePlayServiceSignOut");
+        LGLog.d("","lss GooglePlayServiceSignOut");
 
         mGooglePlayServiceClient.signOut()
                 .addOnCompleteListener(mMainActivity, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         // Sign out completed
-                        NTLog.d("","lss GooglePlayServiceSignOut : " + task.isSuccessful());
+                        LGLog.d("","lss GooglePlayServiceSignOut : " + task.isSuccessful());
                     }
                 });
     }
 
     public void GoogleSilentLogin()
     {
-        NTLog.d("","GoogleSilentLogin");
+        LGLog.d("","GoogleSilentLogin");
 
     }
 
     public void GoogleSignSilentLogin()
     {
-        NTLog.d("","GoogleSignSilentLogin");
+        LGLog.d("","GoogleSignSilentLogin");
     }
 
     public void GooglePlayServiceSilentLogin()
     {
-        NTLog.d("","GooglePlayServiceSilentLogin");
+        LGLog.d("","GooglePlayServiceSilentLogin");
 
 //        Games.getGamesClient(mMainActivity, GoogleSignIn.getLastSignedInAccount(mMainActivity))
 //                .getActivationHint()
@@ -268,14 +287,14 @@ public class Google extends Activity
 //                    public void onComplete(@NonNull Task<Bundle> task) {
 //                        if (task.isSuccessful()) {
 //                            // Signed in successfully
-//                            NTLog.d("GooglePlayServicesSignIn", "Silent Signed in successfully");
+//                            LGLog.d("GooglePlayServicesSignIn", "Silent Signed in successfully");
 //                            // Get AccessToken
 //                            // 여기에서는 AccessToken을 직접 가져오는 API가 제공되지 않으므로 처리 방법은 다를 수 있습니다.
 //                            // Google Play 서비스에 대한 AccessToken은 GoogleSignInAccount에 직접적으로 노출되지 않습니다.
 //                            // 따라서 Google Play 서비스의 Silent 로그인 시 AccessToken을 직접 가져오는 방법에 대해서는 구글 공식 문서를 참고하시기 바랍니다.
 //                        } else {
 //                            // Sign in failed
-//                            NTLog.w("GooglePlayServicesSignIn", "Silent signInResult:failed");
+//                            LGLog.w("GooglePlayServicesSignIn", "Silent signInResult:failed");
 //                        }
 //                    }
 //                });
@@ -301,16 +320,16 @@ public class Google extends Activity
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             // Signed in successfully
            // Toast.makeText(this, "Signed in as: " + account.getEmail(), Toast.LENGTH_SHORT).show();
-            NTLog.d("GoogleSignIn", "lss Signed in as: " + account.getEmail());
+            LGLog.d("GoogleSignIn", "lss Signed in as: " + account.getEmail());
 
             String userid = completedTask.getResult().getId();
             String token = completedTask.getResult().getIdToken();
-            NTLog.d("","lss userid : " + userid );
-//            NTLog.d("","lss token : " + token );
+            LGLog.d("","lss userid : " + userid );
+//            LGLog.d("","lss token : " + token );
 
             // Get AccessToken
 //            String accessToken = account.getIdToken();
-//            NTLog.d("AccessToken", "lss Google Sign-In AccessToken: " + accessToken);
+//            LGLog.d("AccessToken", "lss Google Sign-In AccessToken: " + accessToken);
 
         } catch (ApiException e) {
             // Sign in failed
@@ -324,18 +343,18 @@ public class Google extends Activity
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             // Signed in successfully
             //Toast.makeText(this, "Signed in to Google Play Services as: " + account.getEmail(), Toast.LENGTH_SHORT).show();
-            NTLog.d("GooglePlayServicesSignIn", "lss Signed in as: " + account.getEmail());
+            LGLog.d("GooglePlayServicesSignIn", "lss Signed in as: " + account.getEmail());
 
             String userid = completedTask.getResult().getId();
             String token = completedTask.getResult().getIdToken();
-            NTLog.d("","lss userid : " + userid );
-            //NTLog.d("","lss token : " + token );
+            LGLog.d("","lss userid : " + userid );
+            //LGLog.d("","lss token : " + token );
 
-//            Games.getGamesClient(NTBase.getMainActivity(), completedTask.getResult()).setViewForPopups( mMainActivity.getWindow().getDecorView() );
+//            Games.getGamesClient(LGLog.getMainActivity(), completedTask.getResult()).setViewForPopups( mMainActivity.getWindow().getDecorView() );
 
             String accessToken = account.getIdToken();
             // Get AccessToken
-            //NTLog.d("AccessToken", "lss Google Play Services AccessToken: " + accessToken);
+            //LGLog.d("AccessToken", "lss Google Play Services AccessToken: " + accessToken);
 
             // Additional handling for Google Play Services sign-in
             // ...
@@ -361,7 +380,7 @@ public class Google extends Activity
         intentTask.addOnSuccessListener(new OnSuccessListener<Intent>() {
             @Override
             public void onSuccess(Intent intent) {
-                NTBase.getMainActivity().startActivityForResult(intent, RC_SAVED_GAMES);
+                LGBase.getMainActivity().startActivityForResult(intent, RC_SAVED_GAMES);
                 Log.d("", "lss signInSilently onSuccess");
             }
         });
@@ -371,7 +390,7 @@ public class Google extends Activity
     public Task<SnapshotMetadata> writeSnapshot(String sSaveName, String sSaveData, String sDesc) {
 
         if (sSaveName == null) {
-            NTLog.d("", "sSaveName is null");
+            LGLog.d("", "sSaveName is null");
             return Tasks.forResult(null);
         }
 
@@ -379,18 +398,18 @@ public class Google extends Activity
         if (sSaveData != null) {
             byteData = sSaveData.getBytes(StandardCharsets.UTF_8);
         } else {
-            NTLog.d("", "sSaveData is null");
+            LGLog.d("", "sSaveData is null");
             return Tasks.forResult(null);
         }
 
-        SnapshotsClient snapshotsClient = PlayGames.getSnapshotsClient(NTBase.getMainActivity());
+        SnapshotsClient snapshotsClient = PlayGames.getSnapshotsClient(LGBase.getMainActivity());
         int conflictResolutionPolicy = SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED;
 
         return snapshotsClient.open(sSaveName, true, conflictResolutionPolicy)
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        NTLog.d("" , e.toString());
+                        LGLog.d("" , e.toString());
                     }
                 })
                 .continueWithTask(new Continuation<SnapshotsClient.DataOrConflict<Snapshot>, Task<SnapshotMetadata>>() {
@@ -429,7 +448,7 @@ public class Google extends Activity
             return Tasks.forResult("");
         }
 
-        SnapshotsClient snapshotsClient = PlayGames.getSnapshotsClient(NTBase.getMainActivity());
+        SnapshotsClient snapshotsClient = PlayGames.getSnapshotsClient(LGBase.getMainActivity());
         int conflictResolutionPolicy = SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED;
         return snapshotsClient.open(sLoadSaveName, true, conflictResolutionPolicy)
                 .addOnFailureListener(new OnFailureListener() {

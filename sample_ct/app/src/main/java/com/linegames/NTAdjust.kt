@@ -20,8 +20,8 @@ import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures.addCallback
 
-import com.linegames.base.NTBase
-import com.linegames.base.NTLog
+import com.linegames.base.LGBase
+import com.linegames.base.LGLog
 import org.checkerframework.checker.nullness.compatqual.NullableDecl
 import java.util.concurrent.Executors
 
@@ -33,9 +33,9 @@ class NTAdjust
 
     public constructor()
     {
-        NTLog.d("=============================== constructor constructor =============================== 1" )
+        LGLog.d("=============================== constructor constructor =============================== 1" )
         generationAdId();
-        sharedPref = NTBase.MainActivity.getApplicationContext().getSharedPreferences("adjust",Context.MODE_PRIVATE);
+        sharedPref = LGBase.MainActivity.getApplicationContext().getSharedPreferences("adjust",Context.MODE_PRIVATE);
     }
 
     companion object
@@ -57,14 +57,21 @@ class NTAdjust
         {
             var sAdjustata: String? = null
             sAdjustata = instance.LoadAdjustData("sAdjust")
-            NTLog.d("LoadAdjustData : " + sAdjustata )
+            LGLog.d("LoadAdjustData : " + sAdjustata )
+
+
+            LGLog.d("GetAdjustAdid Adjust.getAdid() : " + Adjust.getAdid() )
             return instance.GetAdjust_Adid()
         }
 
         @JvmStatic fun GetAdid() : String?
         {
             instance.SaveAdjustData("sAdjust","sAdjustData1")
-            NTLog.d("SaveAdjustData sAdjust : sAdjust " + "sAdjustData : sAdjustData1" )
+
+            LGLog.d(" ===================================== " )
+
+            LGLog.d("GetAdid Adjust.getAdid() : " + Adjust.getAdid() )
+
             return instance.GetGPSAdid()
         }
 
@@ -72,9 +79,9 @@ class NTAdjust
     }
 
 //    private fun determineAdvertisingInfo() {
-//        if (isAdvertisingIdProviderAvailable(NTBase.MainActivity)) {
+//        if (isAdvertisingIdProviderAvailable(LGBase.MainActivity)) {
 //            val advertisingIdInfoListenableFuture =
-//                androidx.ads.identifier.AdvertisingIdClient.getAdvertisingIdInfo(NTBase.MainActivity)
+//                androidx.ads.identifier.AdvertisingIdClient.getAdvertisingIdInfo(LGBase.MainActivity)
 //            addCallback(advertisingIdInfoListenableFuture,
 //                object : FutureCallback<AdvertisingIdInfo> {
 //                    fun onSuccess(@NullableDecl result: AdvertisingIdInfo) {
@@ -105,12 +112,12 @@ class NTAdjust
 
     fun AdjustInit(appToken: String, sTrackerToken: String?, environment: String, secretId: Long, info1: Long, info2: Long, info3: Long, info4: Long)
     {
-        NTLog.i("AdjustSdkVersion() : " + Adjust.getSdkVersion());
-        NTLog.d("AdjustInit appToken : " + appToken + " sTrackerToken : " + sTrackerToken + " environment : " + environment + " secretId : " + secretId+ " info1 : " + info1+ " info2 : " + info2+ " info3 : " + info3+ "info4 : " + info4);
+        LGLog.i("AdjustSdkVersion() : " + Adjust.getSdkVersion());
+        LGLog.d("AdjustInit appToken : " + appToken + " sTrackerToken : " + sTrackerToken + " environment : " + environment + " secretId : " + secretId+ " info1 : " + info1+ " info2 : " + info2+ " info3 : " + info3+ "info4 : " + info4);
 
         val setAdjustLogOFF : Boolean = false
 
-        val config = AdjustConfig(NTBase.MainActivity, appToken, environment, setAdjustLogOFF)
+        val config = AdjustConfig(LGBase.MainActivity, appToken, environment, setAdjustLogOFF)
 
         if (!sTrackerToken.isNullOrEmpty())
             config.setDefaultTracker(sTrackerToken)
@@ -122,20 +129,20 @@ class NTAdjust
         }
 
         config.setOnAttributionChangedListener {
-            NTLog.d("--------------- Attribution callback called! ---------------- : " + it.adid)
-            InitReciever( GPS_ADID, it.adid )
+            LGLog.d("--------------- Attribution callback called! ---------------- : " + it.adid)
+            //InitReciever( GPS_ADID, it.adid )
         }
 
         // Set session success tracking delegate.
         config.setOnSessionTrackingSucceededListener { sessionSuccessResponseData ->
-            NTLog.d("---------------- sessionSuccessResponseData.adid ---------------- : " + sessionSuccessResponseData.adid)
-            NTLog.d("---------------- GPS_ADID ---------------- : " + GPS_ADID)
-            InitReciever( GPS_ADID, sessionSuccessResponseData.adid )
+            LGLog.d("---------------- sessionSuccessResponseData.adid ---------------- : " + sessionSuccessResponseData.adid)
+            LGLog.d("---------------- GPS_ADID ---------------- : " + GPS_ADID)
+            //InitReciever( GPS_ADID, sessionSuccessResponseData.adid )
         }
 
         // Set session failure tracking delegate.
         config.setOnSessionTrackingFailedListener {
-            NTLog.d("---------------- Session failure callback called! ---------------- : " + it.adid)
+            LGLog.d("---------------- Session failure callback called! ---------------- : " + it.adid)
         }
         // Allow to send in the background.
         config.setSendInBackground(true)
@@ -155,7 +162,7 @@ class NTAdjust
 
     fun AdjustTrackEvent(sEventToken : String, sNid : String, sGNid : String, sGameServerID : String, sOrderID : String?, sCurrencyType : String?, sAmount : Double)
     {
-        NTLog.d("NTAdjust.kt AdjustTrackEvent eventToken : " + sEventToken + " sNid : " + sNid+ " sGNid : " + sGNid  + " sGameServerID : " + sGameServerID + " sOrderID : " + sOrderID  + " sCurrencyType : " + sCurrencyType  + " sAmount : " + sAmount )
+        LGLog.d("NTAdjust.kt AdjustTrackEvent eventToken : " + sEventToken + " sNid : " + sNid+ " sGNid : " + sGNid  + " sGameServerID : " + sGameServerID + " sOrderID : " + sOrderID  + " sCurrencyType : " + sCurrencyType  + " sAmount : " + sAmount )
 
         val event = AdjustEvent(sEventToken)
         if(!TextUtils.isEmpty(sNid)) event.setCallbackId(sNid)
@@ -182,8 +189,8 @@ class NTAdjust
         @Suppress("DEPRECATION")
         android.os.AsyncTask.execute {
             try {
-                GPS_ADID = AdvertisingIdClient.getAdvertisingIdInfo(NTBase.MainActivity.getApplicationContext()).id
-                NTLog.d("=============================== constructor constructor =============================== 1 GPS_ADID" + GPS_ADID )
+                GPS_ADID = AdvertisingIdClient.getAdvertisingIdInfo(LGBase.MainActivity.getApplicationContext()).id
+                LGLog.d("=============================== constructor constructor =============================== 1 GPS_ADID" + GPS_ADID )
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -192,7 +199,7 @@ class NTAdjust
 
     fun GetGPSAdid() : String?
     {
-        NTLog.d("=============================== constructor constructor =============================== 2" )
+        LGLog.d("=============================== constructor constructor =============================== 2" )
         return GPS_ADID
     }
 
@@ -204,13 +211,13 @@ class NTAdjust
 
     fun LoadAdjustData(sAdjustKey : String) : String?
     {
-        NTLog.d("NTAdjust.kt LoadAdjustData sAdjustKey : " + sAdjustKey )
+        LGLog.d("NTAdjust.kt LoadAdjustData sAdjustKey : " + sAdjustKey )
         return sharedPref.getString(sAdjustKey, "")
     }
 
     fun SaveAdjustData(sAdjustKey : String, sAdjustData : String)
     {
-        NTLog.d("NTAdjust.kt SaveAdjustData sAdjustData : " + sAdjustData + "sAdjustData : " + sAdjustData )
+        LGLog.d("NTAdjust.kt SaveAdjustData sAdjustData : " + sAdjustData + "sAdjustData : " + sAdjustData )
         var editor = sharedPref.edit()
         editor.putString(sAdjustKey, sAdjustData)
         editor.commit()

@@ -53,4 +53,7 @@
     <!--string name="app_id">1:764920947053:android:3a48ce8f849f332794ba64</string>-->
     <!--com.linegames.samples-->
     <!--<string name="fb_login_protocol_scheme">fb183085325620769</string>-->
+    <string name="SaveLoadName">"GoogleCloud_SaveLoadName"</string>>
+    <string name="SaveData">"Google Test Data"</string>>
+    <string name="Desc">"Google Desc"</string>>
 </resources>

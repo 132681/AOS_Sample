@@ -9,7 +9,7 @@ import com.facebook.FacebookException
 import com.facebook.FacebookSdk
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
-import com.linegames.base.NTBase
+import com.linegames.base.LGBase
 
 class Facebook : FacebookCallback<LoginResult>
 {
@@ -49,7 +49,7 @@ class Facebook : FacebookCallback<LoginResult>
         else
         {
             Log.d( TAG, "FacebookSdk Login ========================================== : "  + FacebookSdk.getSdkVersion() )
-            LoginManager.getInstance().logInWithReadPermissions(NTBase.MainActivity , permissionsArray.toList())
+            LoginManager.getInstance().logInWithReadPermissions(LGBase.MainActivity , permissionsArray.toList())
         }
     }
 

@@ -5,7 +5,7 @@ import android.os.AsyncTask
 import android.provider.Settings
 import android.util.Log
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
-import com.linegames.base.NTBase
+import com.linegames.base.LGBase
 import java.util.*
 
 class DeviceInfo
@@ -41,7 +41,7 @@ class DeviceInfo
     {
         AsyncTask.execute {
             try {
-                GPS_ADID = AdvertisingIdClient.getAdvertisingIdInfo(NTBase.MainActivity.getApplicationContext()).id
+                GPS_ADID = AdvertisingIdClient.getAdvertisingIdInfo(LGBase.MainActivity.getApplicationContext()).id
                 Log.d(TAG, "---------------- DeviceInfo generationAdId GPS_ADID ---------------- : " + GPS_ADID)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -51,7 +51,7 @@ class DeviceInfo
 
     fun getAndroidID(): String? {
 
-        AndroidID = Settings.Secure.getString(NTBase.MainActivity.getApplicationContext().contentResolver, Settings.Secure.ANDROID_ID)
+        AndroidID = Settings.Secure.getString(LGBase.MainActivity.getApplicationContext().contentResolver, Settings.Secure.ANDROID_ID)
         Log.d(TAG, "---------------- DeviceInfo getAndroidID AndroidID ---------------- : " + AndroidID)
         return AndroidID
     }
