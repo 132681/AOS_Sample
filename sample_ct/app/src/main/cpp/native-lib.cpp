@@ -120,8 +120,26 @@ extern "C" JNIEXPORT void JNICALL Java_com_linegames_Purchase_nativeCB(
     const char *str_status = env->GetStringUTFChars(status, NULL);
     const char *str_msg = env->GetStringUTFChars(msg, NULL);
 
-    JNI& jni = JNI::Ins();
-    jclass cls = jni.FindClass("com/linegames/Purchase");
+    // MainActivity 클래스를 찾기
+    jclass cls = env->FindClass("com/linegames/ct2/MainActivity");
+    if (cls == NULL) {
+        LOGE("Failed to find MainActivity class");
+        return;
+    }
+
+    // UpdateInfoText 메서드의 ID 가져오기
+    jmethodID methodID = env->GetStaticMethodID(cls, "UpdateInfoText", "()V");
+        if (methodID == NULL) {
+        LOGE("Failed to find UpdateInfoText method");
+    return;
+    }
+
+    // 메서드 호출
+    env->CallStaticVoidMethod(cls, methodID);
+
+    // 사용 후에는 문자열 해제
+    env->ReleaseStringUTFChars(status, str_status);
+    env->ReleaseStringUTFChars(msg, str_msg);
     LOGD("^^^^ Purchase Native CB status %s msg %s userCB %ld ^^^^", str_status, str_msg, userCB);
 }
 
