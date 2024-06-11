@@ -1,7 +1,50 @@
-stages:
-  - build
+variables:
+  BOT_KEY_TECH: "room=tech_supt&key=${LINEBOTAPI_KEY}"
+  BOT_KEY_NTSDK: "room=sdkdev_team&key=${LINEBOTAPI_KEY}"
+  BOT_MSG:
+    "\n${CI_COMMIT_MESSAGE}\n
+     - Branch   : ${CI_COMMIT_REF_NAME} \n
+     - User     : ${GITLAB_USER_NAME} \n
+     - Email    : ${GITLAB_USER_EMAIL} \n
+     - GitLab   : ${CI_PROJECT_URL}"
+  BOT_CALL: curl -X POST https://line-bot.line.games/send/
+  EMAIL_DEPLOY: "dl_ds_unreal_sdk_notify@line.games"
+  EMAIL_TEST: "132681@naver.com"
 
-build_job:
-  stage: build
+stages:
+  - deploy
+  - release
+
+sync:
+  stage: deploy
+  only:
+    - branches
   script:
-    - echo "Hello, GitLab CI!"
+    - git push -f https://${DEPLOY_ACCOUNT_CRED}@out-git.line.games/${CI_PROJECT_PATH}.git HEAD:refs/heads/${CI_COMMIT_REF_NAME}
+    - echo "Sending email to ${EMAIL_TEST}"
+    - |
+      curl -X POST "https://solera.line.games/api/email/v2/send" \
+        -d "svcCd=NOTI_SDK" \
+        -d "fromName=라인게임즈" \
+        -d "to=${EMAIL_TEST}" \
+        -d "subject=${CI_COMMIT_MESSAGE}" \
+        --data-urlencode "htmlMsg=$(echo -e "Commit Message: ${CI_COMMIT_MESSAGE}<br>Branch: ${CI_COMMIT_REF_NAME}<br>User: ${GITLAB_USER_NAME}<br>Email: ${GITLAB_USER_EMAIL}<br>GitLab: ${CI_PROJECT_URL}")"
+
+tag:
+  stage: release
+  only:
+    - tags
+  script:
+    - echo -e "@@@@@@@@@@@@@@@@@@@@  Tag - ${CI_COMMIT_TAG}  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+    - git tag -d ${CI_COMMIT_TAG} && git pull -f --tags origin master
+    - cat README.md | grep "NTSDK ${CI_COMMIT_TAG}" || (echo "Not Found Tag(${CI_COMMIT_TAG}) in README.md" && false)
+    - |
+      _TAG_MSG=$(git tag -l --format='%(contents)' ${CI_COMMIT_TAG} | sed -e 's#^-.*$#<strong>&</strong>#g' -e ':again; s#\(^\|\&nbsp;\)\s\(.*\)#\1\&nbsp;\2#g; t again' | sed ':a;N;$!ba;s/\n/<br\/>/g') &&
+      curl -X POST "https://solera.line.games/api/email/v2/send" \
+        -d "svcCd=NOTI_SDK" \
+        -d "fromName=라인게임즈" \
+        -d "to=${EMAIL_DEPLOY}" \
+        -d "subject=[NTSDK] Unreal ${CI_COMMIT_TAG} 배포되었습니다." \
+        --data-urlencode "htmlMsg=$_TAG_MSG"
+    - git push -f --tags https://${DEPLOY_ACCOUNT_CRED}@out-git.line.games/${CI_PROJECT_PATH}.git
+    - ${BOT_CALL} -d "${BOT_KEY_NTSDK}" --data-urlencode "$(echo -e "msg=NTSDK_${CI_COMMIT_TAG} 버전이 배포되었습니다.\n$(git tag -l --format='%(contents)' ${CI_COMMIT_TAG})")"
