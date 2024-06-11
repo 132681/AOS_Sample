@@ -236,7 +236,7 @@ public class MainActivity extends Activity
 
             // Set OnClickListener for each button
             for (int i = 0; i < 10; i++) {
-                String buttonText = generateButtonText(title, i + 1); // Generate button text based on page title and button index
+                String buttonText = String.valueOf(generateButtonText(title, i + 1)); // Generate button text based on page title and button index
 
                 Button button = null;
                 switch (i) {
@@ -297,7 +297,7 @@ public class MainActivity extends Activity
             }
         }
 
-        private String generateButtonText(String title, int index) {
+        private UserAction.Action generateButtonText(String title, int index) {
             // Generate button text based on page title and button index
             return UserAction.getActionByIndex(title, index);
             //return title + " " + index;
@@ -305,7 +305,7 @@ public class MainActivity extends Activity
 
         private void generateButtonText(String buttonText, TextView infoTextView)  {
             Log.d(TAG, "Google button clicked: " + buttonText );
-            UserAction action = UserAction.fromString(buttonText);
+            UserAction.Action action = UserAction.fromString(buttonText);
 
             if (action!=null)
             {
