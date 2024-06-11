@@ -20,15 +20,23 @@ sync:
   only:
     - branches
   script:
+    - echo "Starting git push..."
     - git push -f https://${DEPLOY_ACCOUNT_CRED}@out-git.line.games/${CI_PROJECT_PATH}.git HEAD:refs/heads/${CI_COMMIT_REF_NAME}
-    - echo "Sending email to ${EMAIL_TEST}"
-    - |
-      curl -X POST "https://solera.line.games/api/email/v2/send" \
+    - echo "Git push completed."
+
+    - echo "Preparing email to ${EMAIL_TEST}..."
+    - email_msg=$(echo -e "Commit Message: ${CI_COMMIT_MESSAGE}<br>Branch: ${CI_COMMIT_REF_NAME}<br>User: ${GITLAB_USER_NAME}<br>Email: ${GITLAB_USER_EMAIL}<br>GitLab: ${CI_PROJECT_URL}")
+    - echo "Email message content:"
+    - echo "$email_msg"
+
+    - echo "Sending email..."
+    - curl -X POST "https://solera.line.games/api/email/v2/send" \
         -d "svcCd=NOTI_SDK" \
         -d "fromName=라인게임즈" \
         -d "to=${EMAIL_TEST}" \
         -d "subject=${CI_COMMIT_MESSAGE}" \
-        --data-urlencode "htmlMsg=$(echo -e "Commit Message: ${CI_COMMIT_MESSAGE}<br>Branch: ${CI_COMMIT_REF_NAME}<br>User: ${GITLAB_USER_NAME}<br>Email: ${GITLAB_USER_EMAIL}<br>GitLab: ${CI_PROJECT_URL}")"
+        --data-urlencode "htmlMsg=$email_msg"
+    - echo "Email sent request completed."
 
 tag:
   stage: release
@@ -40,11 +48,4 @@ tag:
     - cat README.md | grep "NTSDK ${CI_COMMIT_TAG}" || (echo "Not Found Tag(${CI_COMMIT_TAG}) in README.md" && false)
     - |
       _TAG_MSG=$(git tag -l --format='%(contents)' ${CI_COMMIT_TAG} | sed -e 's#^-.*$#<strong>&</strong>#g' -e ':again; s#\(^\|\&nbsp;\)\s\(.*\)#\1\&nbsp;\2#g; t again' | sed ':a;N;$!ba;s/\n/<br\/>/g') &&
-      curl -X POST "https://solera.line.games/api/email/v2/send" \
-        -d "svcCd=NOTI_SDK" \
-        -d "fromName=라인게임즈" \
-        -d "to=${EMAIL_DEPLOY}" \
-        -d "subject=[NTSDK] Unreal ${CI_COMMIT_TAG} 배포되었습니다." \
-        --data-urlencode "htmlMsg=$_TAG_MSG"
-    - git push -f --tags https://${DEPLOY_ACCOUNT_CRED}@out-git.line.games/${CI_PROJECT_PATH}.git
-    - ${BOT_CALL} -d "${BOT_KEY_NTSDK}" --data-urlencode "$(echo -e "msg=NTSDK_${CI_COMMIT_TAG} 버전이 배포되었습니다.\n$(git tag -l --format='%(contents)' ${CI_COMMIT_TAG})")"
+      curl -X POST "https://solera.line.games/api/email/v2/send
