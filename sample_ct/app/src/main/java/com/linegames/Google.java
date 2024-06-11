@@ -82,8 +82,8 @@ public class Google extends Activity
             synchronized ( Google.class ) {
                 if ( getInstance == null )
                     getInstance = new Google();
-                    mMainActivity = LGBase.getMainActivity();
-                    //PlayGamesSdk.initialize(mMainActivity);
+                mMainActivity = LGBase.getMainActivity();
+                //PlayGamesSdk.initialize(mMainActivity);
 
             }
         }
@@ -125,16 +125,16 @@ public class Google extends Activity
         }
         else
         {
-           // StartGooglePlayGamesSdk();
+            // StartGooglePlayGamesSdk();
             GooglePlayServiceSign((success, playerId) -> {
-               if (success)
-               {
+                if (success)
+                {
 
-               }
-               else
-               {
+                }
+                else
+                {
 
-               }
+                }
             });
         }
     }
@@ -143,27 +143,27 @@ public class Google extends Activity
     {
         LGLog.d("","lss GoogleSign");
         mGoogleSignInClient.silentSignIn().addOnCompleteListener( mMainActivity,new OnCompleteListener<GoogleSignInAccount>()
+        {
+            @Override
+            public void onComplete(@NonNull Task<GoogleSignInAccount> taskAuth )
+            {
+                if( taskAuth.isSuccessful() )
                 {
-                    @Override
-                    public void onComplete(@NonNull Task<GoogleSignInAccount> taskAuth )
-                    {
-                        if( taskAuth.isSuccessful() )
-                        {
-                            LGLog.d("","lss Google: SilentSignIn success " + taskAuth.getResult().toString() );
-                            String userid = taskAuth.getResult().getId();
-                            String token = taskAuth.getResult().getIdToken();
-                            LGLog.d("","lss userid : " + userid );
-                            LGLog.d("","lss token : " + token );
-                        }
-                        else
-                        {
-                            LGLog.d("","lss Google: SilentSignIn Fail" );
+                    LGLog.d("","lss Google: SilentSignIn success " + taskAuth.getResult().toString() );
+                    String userid = taskAuth.getResult().getId();
+                    String token = taskAuth.getResult().getIdToken();
+                    LGLog.d("","lss userid : " + userid );
+                    LGLog.d("","lss token : " + token );
+                }
+                else
+                {
+                    LGLog.d("","lss Google: SilentSignIn Fail" );
 
-                            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-                            mMainActivity.startActivityForResult(signInIntent, MainActivity.RC_SIGN_IN_GOOGLE_SIGN_IN);
-                        }
-                    }
-                });
+                    Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+                    mMainActivity.startActivityForResult(signInIntent, MainActivity.RC_SIGN_IN_GOOGLE_SIGN_IN);
+                }
+            }
+        });
 
     }
     @FunctionalInterface
@@ -229,7 +229,8 @@ public class Google extends Activity
                             });
                         } else {
                             // Failed to retrieve authentication code.
-                            LGLog.d("", "lss call requestServerSideAccess fail");
+                            LGLog.d("", "lss call requestServerSideAccess fail :" + task.toString());
+                            LGLog.d("", "lss call requestServerSideAccess fail :" + task.getResult().toString());
                             callback.signInComplete(false, null);
                         }
                     });
@@ -319,7 +320,7 @@ public class Google extends Activity
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             // Signed in successfully
-           // Toast.makeText(this, "Signed in as: " + account.getEmail(), Toast.LENGTH_SHORT).show();
+            // Toast.makeText(this, "Signed in as: " + account.getEmail(), Toast.LENGTH_SHORT).show();
             LGLog.d("GoogleSignIn", "lss Signed in as: " + account.getEmail());
 
             String userid = completedTask.getResult().getId();
@@ -454,7 +455,7 @@ public class Google extends Activity
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                         Log.e("", "Error while opening Snapshot.", e);
+                        Log.e("", "Error while opening Snapshot.", e);
                     }
                 }).continueWith(new Continuation<SnapshotsClient.DataOrConflict<Snapshot>, String>() {
                     @Override

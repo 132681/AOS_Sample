@@ -23,6 +23,7 @@ import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.linegames.base.LGLog;
 import com.linegames.base.LGBase;
+import com.linegames.ct2.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,6 +67,7 @@ public class Purchase implements PurchasesUpdatedListener
 
     public static void Connect( final String jProductMode, final long userCB )
     {
+        LGLog.d("Connect ========================" );
         result_status = "UNKNOWN";
         result_ResponseCode = -1;
 
@@ -235,6 +237,10 @@ public class Purchase implements PurchasesUpdatedListener
 
                         }
                         result_status = "NT_SUCCESS";
+
+                        if ( productsJsonArray.length() != inputProductsCount )
+                            resultMsg = "Invalid ProductID List  => " + invalidProductsId.toString();
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         LGLog.e(e.getMessage());
@@ -247,8 +253,6 @@ public class Purchase implements PurchasesUpdatedListener
                         resultCode = billingResult.getResponseCode();
                 }
 
-                if ( productsJsonArray.length() != inputProductsCount )
-                    resultMsg = "Invalid ProductID List  => " + invalidProductsId.toString();
 
                 GetInstance().Invoke( result_status, productsJsonArray, resultMsg, resultCode , userCB );
             }
@@ -611,6 +615,13 @@ public class Purchase implements PurchasesUpdatedListener
         {
             LGLog.d("Invoke() status : " + result_status + " msg : " + jsonResult.toString() + " userCB : " + userCB  );
             nativeCB( result_status, jsonResult.toString(), userCB );
+            if (MainActivity.infoTextView == null)
+            {
+                LGLog.d("lss MainActivity.infoTextView == null"  );
+            }
+            MainActivity.UpdateInfoText( result_status, jsonResult.toString());//("Invoke() status : " + result_status + " msg : " + jsonResult.toString());
+
+
         }
     }
 

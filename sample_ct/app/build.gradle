@@ -7,7 +7,7 @@ apply plugin: 'kotlin-android'
 android {
     signingConfigs {
         signingAPK {
-            storeFile file('D:\\Git\\Unity\\cointop\\cointop\\ct.jks')
+            storeFile file('D:\\Git\\UE\\AOS_Sample\\sample_ct\\ct.keystore')
             storePassword 'zhdlsxkq1!'
             keyPassword 'zhdlsxkq1!'
             keyAlias = 'linegames'
@@ -33,7 +33,7 @@ android {
                 cppFlags ""
             }
         }
-        ndk.abiFilters 'armeabi-v7a','arm64-v8a','x86','x86_64'
+        ndk.abiFilters 'armeabi-v7a','arm64-v8a', 'x86_64'
 
     }
     buildTypes {
@@ -46,7 +46,7 @@ android {
         }
         debug {
             debuggable true
-           signingConfig signingConfigs.signingAPK
+            signingConfig signingConfigs.signingAPK
         }
     }
     externalNativeBuild {

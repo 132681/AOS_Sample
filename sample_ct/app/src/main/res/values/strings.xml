@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">sample</string>
+    <string name="app_name">sample_ct2</string>
     <string name="adjustinit">AdjustInit</string>
     <string name="adjustevent1">adjustevent1</string>
     <string name="adjustevent2">adjustevent2</string>

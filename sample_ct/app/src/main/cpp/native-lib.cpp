@@ -120,24 +120,32 @@ extern "C" JNIEXPORT void JNICALL Java_com_linegames_Purchase_nativeCB(
     const char *str_status = env->GetStringUTFChars(status, NULL);
     const char *str_msg = env->GetStringUTFChars(msg, NULL);
 
-    // MainActivity 클래스를 찾기
     jclass cls = env->FindClass("com/linegames/ct2/MainActivity");
     if (cls == NULL) {
         LOGE("Failed to find MainActivity class");
+        env->ReleaseStringUTFChars(status, str_status);
+        env->ReleaseStringUTFChars(msg, str_msg);
         return;
     }
 
     // UpdateInfoText 메서드의 ID 가져오기
-    jmethodID methodID = env->GetStaticMethodID(cls, "UpdateInfoText", "()V");
-        if (methodID == NULL) {
+    jmethodID methodID = env->GetStaticMethodID(cls, "UpdateInfoText", "(Ljava/lang/String;Ljava/lang/String;)V");
+    if (methodID == NULL) {
         LOGE("Failed to find UpdateInfoText method");
-    return;
+        env->ReleaseStringUTFChars(status, str_status);
+        env->ReleaseStringUTFChars(msg, str_msg);
+        return;
     }
 
     // 메서드 호출
-    env->CallStaticVoidMethod(cls, methodID);
+    env->CallStaticVoidMethod(cls, methodID, status, msg);
+    if (env->ExceptionCheck()) {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+        LOGE("Exception occurred while calling UpdateInfoText");
+    }
 
-    // 사용 후에는 문자열 해제
+    // C 문자열 해제
     env->ReleaseStringUTFChars(status, str_status);
     env->ReleaseStringUTFChars(msg, str_msg);
     LOGD("^^^^ Purchase Native CB status %s msg %s userCB %ld ^^^^", str_status, str_msg, userCB);

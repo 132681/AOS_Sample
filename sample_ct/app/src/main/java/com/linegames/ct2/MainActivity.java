@@ -40,18 +40,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import org.json.JSONException;
-
 public class MainActivity extends Activity
 {
-    private ViewPager2 viewPager;
-    private MyPagerAdapter pagerAdapter;
+    private static ViewPager2 viewPager;
+    private static MyPagerAdapter pagerAdapter;
     private List<String> titles;
 
     private static final String TAG = "NTSDK";
     public static String PurchaseConsumeProductId = "cointop2_google_play_gem100";
     public static String ConsumeProductId1 = "cointop2_google_play_gem100";
-//    public static String ConsumeProductId1 = "cointop2_google_play_gem300";
+    //    public static String ConsumeProductId1 = "cointop2_google_play_gem300";
     public static String ConsumeProductId1Sub = "cointop2_google_play_gem100_sub";
     public static String ConsumeProductId2 = "cointop2_google_play_gem500";
     public static String ConsumeProductId3 = "cointop2_google_play_gem100000";
@@ -81,7 +79,6 @@ public class MainActivity extends Activity
 
     private String selectedProductId = "cointop2_google_play_gem100";
 
-
     public native String stringFromJNI();
     //public native String LoginReciever(int status, String jsAccessToken, String jsMsg);
     //@JvmStatic external fun LoginReciever( status : Int, jsFBID : String, jsAccessToken : String, jsMsg : String )
@@ -103,20 +100,32 @@ public class MainActivity extends Activity
         titles = new ArrayList<>();
         titles.add("Google");
         titles.add("Purchase");
-        titles.add("Adjust");
-        titles.add("UMG");
-        titles.add("ETC1_");
-        titles.add("ETC2_");
+//        titles.add("LogView");
+//        titles.add("Adjust");
+//        titles.add("UMG");
+//        titles.add("ETC1_");
+//        titles.add("ETC2_");
 
         viewPager = findViewById(R.id.viewPager);
+        if (viewPager == null)
+        {
+            LGLog.d("lss viewPager is null");
+            return;
+        }
 
         pagerAdapter = new MyPagerAdapter(titles, viewPager);
+        if (pagerAdapter == null)
+        {
+            LGLog.d("lss pagerAdapter is null");
+            return;
+        }
         viewPager.setAdapter(pagerAdapter);
 
-        viewPager.setCurrentItem(titles.size() * 1000, false);
+        viewPager.setCurrentItem(titles.size() * 100, true);
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageScrollStateChanged(int state) {
+                LGLog.d("lss onPageScrollStateChanged : " + state);
                 super.onPageScrollStateChanged(state);
                 if (state == ViewPager2.SCROLL_STATE_IDLE) {
                     int currentPosition = viewPager.getCurrentItem();
@@ -129,9 +138,36 @@ public class MainActivity extends Activity
                 }
             }
         });
+
         infoTextView = pagerAdapter.getInfoTextView(0);
         if (infoTextView != null) {
             infoTextView.setText("Updated Info Text");
+        }
+    }
+
+    // InfoUpdateListener 인터페이스 정의
+    public interface InfoUpdateListener {
+        void onUpdateInfoText(String infoText);
+    }
+
+    // onUpdateInfoText 메서드 구현
+    private InfoUpdateListener infoUpdateListener = new InfoUpdateListener() {
+        @Override
+        public void onUpdateInfoText(String infoText) {
+            // 이곳에서 infoTextView의 텍스트를 업데이트합니다.
+            // 예: infoTextView.setText(infoText);
+        }
+    };
+
+    public static void UpdateInfoText(String status, String sInfoData)
+    {
+        LGLog.d("lss UpdateInfoText titles : " + pagerAdapter.titles);
+        LGLog.d("lss UpdateInfoText getCurrentItem : " + pagerAdapter.viewPager.getCurrentItem());
+        infoTextView = pagerAdapter.getInfoTextView( pagerAdapter.viewPager.getCurrentItem());
+        if (infoTextView != null) {
+            infoTextView.setText(status + "" + sInfoData);
+        } else {
+            LGLog.d("lss pagerAdapter: " + (pagerAdapter != null ? "Not null" : "Null"));
         }
     }
 
@@ -156,7 +192,9 @@ public class MainActivity extends Activity
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            // 기타 페이지인 경우 기존의 item_page.xml을 사용
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_page, parent, false);
+            Log.d(TAG, "lss onCreateViewHolder Etc" );
             return new ViewHolder(view);
         }
 
@@ -165,7 +203,6 @@ public class MainActivity extends Activity
             int virtualPosition = position % titles.size();
             String title = titles.get(virtualPosition);
             holder.titleTextView.setText(title);
-
             // Set up spinner for Purchase page only
             if (title.equals("Purchase")) {
                 holder.spinner.setVisibility(View.VISIBLE);
@@ -262,138 +299,127 @@ public class MainActivity extends Activity
 
         private String generateButtonText(String title, int index) {
             // Generate button text based on page title and button index
-            return title + " " + index;
+            return UserAction.getActionByIndex(title, index);
+            //return title + " " + index;
         }
 
         private void generateButtonText(String buttonText, TextView infoTextView)  {
             Log.d(TAG, "Google button clicked: " + buttonText );
-            switch (buttonText) {
-                case "Google 1":
-                    Google.GetInstance().GoogleSign();
-                    infoTextView.setText("GoogleSign");
-                    break;
-                case "Google 2":
-                    Google.GetInstance().GoogleSignOut();
-                    infoTextView.setText("GoogleSignOut");
-                    break;
-                case "Google 3":
-                    // 람다 표현식으로 GooglePlayServiceSign 사용
-                    Google.GetInstance().GooglePlayServiceSign( (success, playerId) -> {
-                        String resultStr = "Sign in failed.";
-                        if (success) {
-                            LGLog.d("", "Sign in successful! Player ID: " + playerId);
-                            resultStr = "Sign in successful! Player ID: " + playerId;
-                        } else {
-                            LGLog.d("", "Sign in failed.");
-                        }
-                        infoTextView.setText("GooglePlayServiceSign");
-                    });
+            UserAction action = UserAction.fromString(buttonText);
 
-                    break;
-                case "Google 4":
-                    Google.GetInstance().signInSilently();
-                    infoTextView.setText("GoogleCloud List");
-                    break;
-                case "Google 5":
-                    Google.GetInstance().writeSnapshot(getString(R.string.SaveLoadName), getString(R.string.SaveData), getString(R.string.Desc))
-                            .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
-                                @Override
-                                public void onComplete(@NonNull Task<SnapshotMetadata> task) {
-                                    if (task.isSuccessful()) {
-                                        // 게임 콘텐츠가 성공적으로 저장되었을 때의 처리
-                                        // 예를 들어, 사용자에게 저장 완료 메시지를 표시하거나 UI를 업데이트할 수 있습니다.
-                                        LGLog.d("","lss GoogleCloudSave Success : " + task.toString());
-                                        infoTextView.setText("Success GoogleCloudSave");
-                                    } else {
-                                        // 저장이 실패한 경우 처리
-                                        Exception e = task.getException();
-                                        LGLog.d("","lss GoogleCloudSave Error : " + e.toString());
-                                        // 에러 메시지를 표시하거나 적절한 오류 처리를 수행합니다.
-                                        infoTextView.setText(" GoogleCloudSave Error : " + e.toString());
-                                    }
-                                }});
-                            break;
-                case "Google 6":
-                        Google.GetInstance().loadSnapshot(getString(R.string.SaveLoadName)).addOnCompleteListener(new OnCompleteListener<String>() {
+            if (action!=null)
+            {
+                switch (action) {
+                    case GOOGLE_SIGN:
+                        Google.GetInstance().GoogleSign();
+                        infoTextView.setText("GoogleSign");
+                        break;
+                    case GOOGLE_SIGN_OUT:
+                        Google.GetInstance().GoogleSignOut();
+                        infoTextView.setText("GoogleSignOut");
+                        break;
+                    case GOOGLE_PLAY_SERVICE_SIGN:
+                        // 람다 표현식으로 GooglePlayServiceSign 사용
+                        Google.GetInstance().GooglePlayServiceSign( (success, playerId) -> {
+                            String resultStr = "GOOGLE_PLAY_SERVICE_SIGN failed.";
+                            if (success) {
+                                LGLog.d("", "Sign in successful! Player ID: " + playerId);
+                                resultStr = "Sign in successful! Player ID: " + playerId;
+                            } else {
+                                LGLog.d("", "Sign in failed.");
+                            }
+                            infoTextView.setText(resultStr);
+                        });
+
+                        break;
+                    case GOOGLE_CLOUD_LIST:
+                        Google.GetInstance().signInSilently();
+                        infoTextView.setText("GoogleCloud List");
+                        break;
+                    case GOOGLE_CLOUD_SAVE:
+                        Google.GetInstance().writeSnapshot(getString(R.string.SaveLoadName), getString(R.string.SaveData), getString(R.string.Desc))
+                                .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
                                     @Override
-                                    public void onComplete(@NonNull Task<String> task) {
+                                    public void onComplete(@NonNull Task<SnapshotMetadata> task) {
                                         if (task.isSuccessful()) {
-                                            // 작업이 성공적으로 완료됐을 때
-                                            String snapshotData = task.getResult();
-                                            Log.d(TAG, "lss GoogleCloudLoad Success : " + snapshotData);
-                                            // snapshotData를 사용하여 필요한 작업을 수행합니다.
-                                            infoTextView.setText("Success GoogleCloudLoad : " + snapshotData);
+                                            // 게임 콘텐츠가 성공적으로 저장되었을 때의 처리
+                                            // 예를 들어, 사용자에게 저장 완료 메시지를 표시하거나 UI를 업데이트할 수 있습니다.
+                                            LGLog.d("","lss GoogleCloudSave Success : " + task.toString());
+                                            infoTextView.setText("Success GoogleCloudSave");
                                         } else {
-                                            // 작업이 실패했을 때
+                                            // 저장이 실패한 경우 처리
                                             Exception e = task.getException();
-                                            // 실패 이유를 처리합니다.
-                                            Log.d(TAG, "lss GoogleCloudLoad Error e : " + e.toString());
-                                            infoTextView.setText("GoogleCloudLoad Error : " + e.toString());
+                                            LGLog.d("","lss GoogleCloudSave Error : " + e.toString());
+                                            // 에러 메시지를 표시하거나 적절한 오류 처리를 수행합니다.
+                                            infoTextView.setText(" GoogleCloudSave Error : " + e.toString());
                                         }
-                                    }
-                                });
-                            break;
-                case "Purchase 1":
-                    Purchase.GetInstance().Connect("", 111);
-                    //infoTextView.setText("Google information");
-                    break;
-                case "Purchase 2":
-                    List<String> spinnerItems = getSpinnerItems();
-                    for (String item : spinnerItems) {
-                        Log.d(TAG, "Purchase 2 Spinner Item: " + item);
-                        Purchase.GetInstance().RegisterProduct(item);
-                    }
-                    Purchase.GetInstance().RefreshProductInfo( 111);
-                    break;
-                case "Purchase 3":
-                    Purchase.GetInstance().BuyProduct(getSelectedProductId(), "", 111);
-                    break;
-                case "Purchase 4":
-                    try {
-                        Purchase.GetInstance().Consume(getSelectedProductId(),111);
-                    } catch (Exception e)
-                    {
+                                    }});
+                        break;
+                    case GOOGLE_CLOUD_LOAD:
+                        Google.GetInstance().loadSnapshot(getString(R.string.SaveLoadName)).addOnCompleteListener(new OnCompleteListener<String>() {
+                            @Override
+                            public void onComplete(@NonNull Task<String> task) {
+                                if (task.isSuccessful()) {
+                                    // 작업이 성공적으로 완료됐을 때
+                                    String snapshotData = task.getResult();
+                                    Log.d(TAG, "lss GoogleCloudLoad Success : " + snapshotData);
+                                    // snapshotData를 사용하여 필요한 작업을 수행합니다.
+                                    infoTextView.setText("Success GoogleCloudLoad : " + snapshotData);
+                                } else {
+                                    // 작업이 실패했을 때
+                                    Exception e = task.getException();
+                                    // 실패 이유를 처리합니다.
+                                    Log.d(TAG, "lss GoogleCloudLoad Error e : " + e.toString());
+                                    infoTextView.setText("GoogleCloudLoad Error : " + e.toString());
+                                }
+                            }
+                        });
+                        break;
+                    case PURCHASE_CONNECT:
+                        Purchase.GetInstance().Connect("", 111);
+                        //infoTextView.setText("Google information");
+                        break;
+                    case PURCHASE_REFRESHPRODUCTINFO:
+                        List<String> spinnerItems = getSpinnerItems();
+                        for (String item : spinnerItems) {
+                            Log.d(TAG, "Purchase 2 Spinner Item: " + item);
+                            Purchase.GetInstance().RegisterProduct(item);
+                        }
+                        Purchase.GetInstance().RefreshProductInfo( 111);
+                        break;
+                    case PURCHASE_BUYPURCHASE:
+                        Purchase.GetInstance().BuyProduct(getSelectedProductId(), "", 111);
+                        break;
+                    case PURCHASE_CONSUME:
+                        try {
+                            Purchase.GetInstance().Consume(getSelectedProductId(),111);
+                        } catch (Exception e)
+                        {
 
-                    }
-                    break;
-                case "Purchase 5":
-                    Purchase.GetInstance().RestoreProduct (111);
-                    break;
-                case "Purchase 6":
-                    Purchase.GetInstance().ConsumeAll(111);
-                    break;
-                case "Adjust 1":
-                    break;
-                case "Adjust 2":
-                    break;
-                case "Adjust 3":
-                    break;
-                case "Adjust 4":
-                    break;
-                case "Adjust 5":
-                    break;
-                case "Adjust 6":
-                    break;
-                case "UMG 1":
-                    break;
-                case "UMG 2":
-                    break;
-                case "UMG 3":
-                    break;
-                case "UMG 4":
-                    break;
-                case "UMG 5":
-                    break;
-                case "UMG 6":
-                    break;
-                default:
-                    // Login canceled due to other error
+                        }
+                        break;
+                    case PURCHASE_RESTORE:
+                        Purchase.GetInstance().RestoreProduct (111);
+                        break;
+                    case PURCHASE_CONSUMEALL:
+                        Purchase.GetInstance().ConsumeAll(111);
+                        break;
+                    case ADJUST_EVENT1:
+                        break;
+                    case ADJUST_EVENT2:
+                        break;
+//                case "UMG 1":
+//                    break;
+//                case "UMG 2":
+//                    break;
+                    default:
+                        // Login canceled due to other error
+                }
+            }
+            else {
+                Log.d(TAG, "action is null  " + action );
             }
         }
-
-        //        private void handleGoogleButtonClick(String buttonText, TextView infoTextView) {
-//            Log.d(TAG, "Google button clicked: " + buttonText);
-//        }
 
         @Override
         public int getItemCount() {
@@ -404,6 +430,7 @@ public class MainActivity extends Activity
             RecyclerView recyclerView = (RecyclerView) viewPager.getChildAt(0);
             RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(position);
             if (viewHolder != null) {
+                LGLog.d("lss getInfoTextView position : " + position  );
                 return ((ViewHolder) viewHolder).infoTextView;
             } else {
                 return null;
@@ -455,46 +482,38 @@ public class MainActivity extends Activity
                 } else {
                     Log.e("ViewHolder", "Spinner not found");
                 }
-
             }
         }
-//        private static List<String> getSpinnerItems() {
-//            List<String> items = new ArrayList<>();
-//            items.add("cointop2_google_play_gem100");
-//            items.add("cointop2_google_play_gem300");
-//            items.add("cointop2_google_play_gem500");
-//            return items;
-//        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intentData)
     {
         super.onActivityResult(requestCode, resultCode, intentData);
-        Log.d( "NTSDK", "@@@@@@@@@@@@  onActivityResult @@@@@@@@@@@@@ " + " resultcode : " + requestCode  );
+        Log.d( "NTSDK", "lss @@@@@@@@@@@@  onActivityResult @@@@@@@@@@@@@ " + " resultCode : " + resultCode  );
 
         if(requestCode == 0XFF)
         {
             LineLoginResult result = LineLoginApi.getLoginResultFromIntent(intentData);
-            Log.d( "NTSDK", "@@@@@@@@@@@@" + " result.getResponseCode() : " + result.getResponseCode() );
+            Log.d( "NTSDK", "lss @@@@@@@@@@@@" + " result.getResponseCode() : " + result.getResponseCode() );
 
             Line.Companion.LineOnActivityResult( requestCode, resultCode, intentData );
 
             switch (result.getResponseCode()) {
-            case SUCCESS:
-                // Login successful
-                String accessToken = result.getLineCredential().getAccessToken().getTokenString();
-                Log.d("NTSDK","LINE Login Success accessToken : " + accessToken);
-                break;
+                case SUCCESS:
+                    // Login successful
+                    String accessToken = result.getLineCredential().getAccessToken().getTokenString();
+                    Log.d("NTSDK","LINE Login Success accessToken : " + accessToken);
+                    break;
 
-            case CANCEL:
-                // Login canceled by user
-                Log.d("NTSDK", "LINE Login Canceled by user. " + result.getErrorData().toString());
-                break;
+                case CANCEL:
+                    // Login canceled by user
+                    Log.d("NTSDK", "LINE Login Canceled by user. " + result.getErrorData().toString());
+                    break;
 
-            default:
-                // Login canceled due to other error
-                Log.e("NTSDK", "Login FAILED! " + result.getErrorData().toString());
+                default:
+                    // Login canceled due to other error
+                    Log.e("NTSDK", "Login FAILED! " + result.getErrorData().toString());
             }
         }
         else if ( requestCode == 64206 )
@@ -504,11 +523,13 @@ public class MainActivity extends Activity
         }
         else if (requestCode == RC_SIGN_IN_GOOGLE_SIGN_IN)
         {
+            Log.d("NTSDK", "lss Google Login onActivityResult ");
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intentData);
             Google.GetInstance().handleSignInResult(task);
         }
         else if (requestCode == RC_SIGN_IN_GOOGLE_PLAY_SERVICES_SIGN_IN)
         {
+            Log.d("NTSDK", "lss GooglePlay Login onActivityResult ");
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intentData);
             Google.GetInstance().handleGooglePlayServicesSignInResult(task);
         }
@@ -578,30 +599,6 @@ public class MainActivity extends Activity
     @Override
     protected void onStop()
     {
- //       Log.e( "NTSDK", "@@@@@@@@@@@@  Start @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-//        new Handler().postDelayed(new Runnable()
-//        {
-//            @Override
-//            public void run()
-//            {
-//                //딜레이 후 시작할 코드 작성
-//                testFunc();
-//            }
-//        }, 600);
-//        List<String> skuList = new ArrayList<String>();
-//        skuList.add("ct_samsung_apps_gem100");
-//        skuList.add("ct_samsung_apps_gem300");
-//        skuList.add("ct_samsung_apps_gem500");
-//        String[] pidArray = skuList.toArray(new String[skuList.size()]);
-//
-//        for (String pid : pidArray)
-//        {
-//            PurchaseGalaxy.RegisterProduct (pid);
-//        }
-//
-//        Log.e( "NTSDK", "@@@@@@@@@@@@  Start 1 @@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-//        PurchaseGalaxy.RefreshProductInfo(111);
-
         if (LGBase.getMainActivity() == null)
             Log.i( "NTSDK", "1 Activity is null.");
         super.onStop();

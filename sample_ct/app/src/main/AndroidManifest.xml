@@ -81,12 +81,12 @@
             android:configChanges="orientation|screenSize"/>
         <!-- GalsxyStore end !-->
 
-        <activity android:configChanges="orientation|screenSize"
-            android:screenOrientation="behind"
-            android:name="com.linegames.google.play.service.GoogleSignInActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-            android:exported="false">
-        </activity>
+<!--        <activity android:configChanges="orientation|screenSize"-->
+<!--            android:screenOrientation="behind"-->
+<!--            android:name="com.linegames.google.play.service.GoogleSignInActivity"-->
+<!--            android:theme="@style/Theme.AppCompat.Light.NoActionBar"-->
+<!--            android:exported="false">-->
+<!--        </activity>-->
 
     </application>
 
