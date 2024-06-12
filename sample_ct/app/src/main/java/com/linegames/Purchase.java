@@ -378,6 +378,7 @@ public class Purchase implements PurchasesUpdatedListener
                                 {
                                     LGLog.d("Purchase Pending Return. (" + GetInstance().GetProductIdFromReceipt(product.getOriginalJson()) + ")");
                                     GetInstance().RemoveSharedPreferencesData(product.getOrderId());
+                                    GetInstance().Invoke( result_status, productsJsonArray, billingResult.getDebugMessage(), billingResult.getResponseCode() , purchaseCB );
                                     return;
                                 }
                             }
@@ -534,7 +535,7 @@ public class Purchase implements PurchasesUpdatedListener
                         LGLog.e("RestoreProduct catch!!!!");
                     }
                 }
-
+                LGLog.d("queryPurchasesAsync list.toString() : 2");
                 GetInstance().Invoke( "NT_SUCCESS" , productsJsonArray, billingResult.getDebugMessage (), billingResult.getResponseCode() , userCB );
             }
         });

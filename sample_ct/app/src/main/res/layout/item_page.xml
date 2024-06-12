@@ -17,18 +17,17 @@
     <TextView
         android:id="@+id/infoTextView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="34dp"
         android:layout_below="@id/titleTextView"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:textSize="16sp"
+        android:layout_marginTop="6dp"
+        android:textSize="12sp"
         android:textColor="#888888"
         android:text="Info"
         android:background="#FFFFE0"
         android:maxLines="2"
         android:ellipsize="end"
-        android:padding="8dp" />
-
+        android:padding="2dp" />
 
     <Spinner
         android:id="@+id/spinner"

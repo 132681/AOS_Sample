@@ -161,7 +161,6 @@ public class MainActivity extends Activity
     public static void UpdateInfoText(String status, String sInfoData)
     {
         LGLog.d("lss UpdateInfoText titles : " + pagerAdapter.titles);
-        LGLog.d("lss UpdateInfoText getCurrentItem : " + pagerAdapter.viewPager.getCurrentItem());
         infoTextView = pagerAdapter.getInfoTextView( pagerAdapter.viewPager.getCurrentItem());
         if (infoTextView != null) {
             infoTextView.setText(status + "" + sInfoData);
@@ -542,7 +541,6 @@ public class MainActivity extends Activity
             RecyclerView recyclerView = (RecyclerView) viewPager.getChildAt(0);
             RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(position);
             if (viewHolder != null) {
-                LGLog.d("lss getInfoTextView position : " + position  );
                 return ((ViewHolder) viewHolder).infoTextView;
             } else {
                 return null;
