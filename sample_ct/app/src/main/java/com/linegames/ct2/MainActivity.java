@@ -98,9 +98,8 @@ public class MainActivity extends Activity
         Log.d(TAG, "targetSdkVersion : " + targetSdkVersion);
 
         titles = new ArrayList<>();
-        titles.add("Google");
-        titles.add("Purchase");
-//        titles.add("LogView");
+        titles.add("GOOGLE");
+        titles.add("PURCHASE");//        titles.add("LogView");
 //        titles.add("Adjust");
 //        titles.add("UMG");
 //        titles.add("ETC1_");
@@ -125,7 +124,7 @@ public class MainActivity extends Activity
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageScrollStateChanged(int state) {
-                LGLog.d("lss onPageScrollStateChanged : " + state);
+                //LGLog.d("lss onPageScrollStateChanged : " + state);
                 super.onPageScrollStateChanged(state);
                 if (state == ViewPager2.SCROLL_STATE_IDLE) {
                     int currentPosition = viewPager.getCurrentItem();
@@ -184,7 +183,8 @@ public class MainActivity extends Activity
     public class MyPagerAdapter extends RecyclerView.Adapter<MyPagerAdapter.ViewHolder> {
         private List<String> titles;
         private ViewPager2 viewPager;
-        public MyPagerAdapter(List<String> titles, ViewPager2  viewPager) {
+
+        public MyPagerAdapter(List<String> titles, ViewPager2 viewPager) {
             this.titles = titles;
             this.viewPager = viewPager;
         }
@@ -194,24 +194,29 @@ public class MainActivity extends Activity
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             // 기타 페이지인 경우 기존의 item_page.xml을 사용
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_page, parent, false);
-            Log.d(TAG, "lss onCreateViewHolder Etc" );
+            Log.d(TAG, "lss onCreateViewHolder Etc");
             return new ViewHolder(view);
         }
 
+        // onBindViewHolder 메서드 수정
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             int virtualPosition = position % titles.size();
             String title = titles.get(virtualPosition);
             holder.titleTextView.setText(title);
-            // Set up spinner for Purchase page only
-            if (title.equals("Purchase")) {
-                holder.spinner.setVisibility(View.VISIBLE);
-            } else {
-                holder.spinner.setVisibility(View.GONE);
-            }
+            Log.d(TAG, "lss onBindViewHolder ========================");
+
+//            // Set up spinner for Purchase page only
+//            if (title.equals("Purchase")) {
+//                holder.spinner.setVisibility(View.VISIBLE);
+//            } else {
+//                holder.spinner.setVisibility(View.GONE);
+//            }
 
             // Set infotextview based on page title
             holder.infoTextView.setText(title);
+            Log.d(TAG, "lss onBindViewHolder ======================== title : " + title);
+
             // Set text information for each page
             switch (title) {
                 case "Google":
@@ -233,11 +238,13 @@ public class MainActivity extends Activity
                     holder.infoTextView.setText("ETC2 information");
                     break;
             }
-
+            Log.d(TAG, "lss onBindViewHolder ======================== 1 title : " + title);
             // Set OnClickListener for each button
             for (int i = 0; i < 10; i++) {
-                String buttonText = String.valueOf(generateButtonText(title, i + 1)); // Generate button text based on page title and button index
-
+                Log.d(TAG, "lss onBindViewHolder ======================== 2 title : " + title);
+                int tempi = i;
+                String buttonText = UserAction.getActionByIndex(title, tempi + 1); // Generate button text based on page title and button index
+                LGLog.d("", "lss buttonText : " + buttonText);
                 Button button = null;
                 switch (i) {
                     case 0:
@@ -270,26 +277,131 @@ public class MainActivity extends Activity
                         @Override
                         public void onClick(View v) {
                             // Call corresponding class's function based on button text
-                            switch (title) {
-                                case "Google":
-                                    generateButtonText(buttonText, holder.infoTextView);
-                                    break;
-                                case "Purchase":
-                                    generateButtonText(buttonText, holder.infoTextView);
-                                    break;
-                                case "Adjust":
-                                    generateButtonText(buttonText, holder.infoTextView);
-                                    break;
-                                case "UMG":
-                                    generateButtonText(buttonText, holder.infoTextView);
-                                    break;
-                                case "ETC1":
-                                    generateButtonText(buttonText, holder.infoTextView);
-                                    break;
-                                case "ETC2":
-                                    generateButtonText(buttonText, holder.infoTextView);
-                                    break;
-                                // Add cases for other titles if needed
+                            String actionText = UserAction.getActionByIndex(title, tempi + 1); // Generate button text based on page title and button index
+                            LGLog.d("", "lss onClick actionText : " + actionText);
+
+                            UserAction.Action action = UserAction.fromString(title + " " + (tempi + 1));
+
+                            if (action != null)
+                                LGLog.d("", "lss onClick actionText str : " + action.toString());
+
+                            if (action != null) {
+                                switch (action) {
+                                    case GOOGLE_SIGN:
+                                        Google.GetInstance().GoogleSign();
+                                        holder.infoTextView.setText("GoogleSign");
+                                        break;
+                                    case GOOGLE_SIGN_OUT:
+                                        Google.GetInstance().GoogleSignOut();
+                                        holder.infoTextView.setText("GoogleSignOut");
+                                        break;
+                                    case GOOGLE_PLAY_SERVICE_SIGN:
+                                        Google.GetInstance().GooglePlayServiceSign((success, playerId) -> {
+                                            String resultStr = "GOOGLE_PLAY_SERVICE_SIGN failed.";
+                                            if (success) {
+                                                LGLog.d("", "Sign in successful! Player ID: " + playerId);
+                                                resultStr = "Sign in successful! Player ID: " + playerId;
+                                            } else {
+                                                LGLog.d("", "Sign in failed.");
+                                            }
+                                            holder.infoTextView.setText(resultStr);
+                                        });
+                                        break;
+                                    case GOOGLE_CLOUD_LIST:
+                                        Google.GetInstance().signInSilently();
+                                        holder.infoTextView.setText("GoogleCloud List");
+                                        break;
+                                    case GOOGLE_CLOUD_SAVE:
+                                        Google.GetInstance().writeSnapshot(v.getContext().getString(R.string.SaveLoadName), v.getContext().getString(R.string.SaveData), v.getContext().getString(R.string.Desc))
+                                                .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<SnapshotMetadata> task) {
+                                                        if (task.isSuccessful()) {
+                                                            LGLog.d("", "lss GoogleCloudSave Success : " + task.toString());
+                                                            holder.infoTextView.setText("Success GoogleCloudSave");
+                                                        } else {
+                                                            Exception e = task.getException();
+                                                            LGLog.d("", "lss GoogleCloudSave Error : " + e.toString());
+                                                            holder.infoTextView.setText(" GoogleCloudSave Error : " + e.toString());
+                                                        }
+                                                    }
+                                                });
+                                        break;
+                                    case GOOGLE_CLOUD_LOAD:
+                                        Google.GetInstance().loadSnapshot(v.getContext().getString(R.string.SaveLoadName)).addOnCompleteListener(new OnCompleteListener<String>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<String> task) {
+                                                if (task.isSuccessful()) {
+                                                    String snapshotData = task.getResult();
+                                                    Log.d(TAG, "lss GoogleCloudLoad Success : " + snapshotData);
+                                                    holder.infoTextView.setText("Success GoogleCloudLoad : " + snapshotData);
+                                                } else {
+                                                    Exception e = task.getException();
+                                                    Log.d(TAG, "lss GoogleCloudLoad Error e : " + e.toString());
+                                                    holder.infoTextView.setText("GoogleCloudLoad Error : " + e.toString());
+                                                }
+                                            }
+                                        });
+                                        break;
+                                    case PURCHASE_CONNECT:
+                                        Purchase.GetInstance().Connect("", 111);
+                                        break;
+                                    case PURCHASE_REFRESHPRODUCTINFO:
+                                        List<String> spinnerItems = getSpinnerItems();
+                                        for (String item : spinnerItems) {
+                                            Log.d(TAG, "Purchase 2 Spinner Item: " + item);
+                                            Purchase.GetInstance().RegisterProduct(item);
+                                        }
+                                        Purchase.GetInstance().RefreshProductInfo(111);
+                                        break;
+                                    case PURCHASE_BUYPURCHASE:
+                                        Purchase.GetInstance().BuyProduct(getSelectedProductId(), "", 111);
+                                        break;
+                                    case PURCHASE_CONSUME:
+                                        try {
+                                            Purchase.GetInstance().Consume(getSelectedProductId(), 111);
+                                        } catch (Exception e) {
+                                            // Handle exception
+                                        }
+                                        break;
+                                    case PURCHASE_RESTORE:
+                                        Purchase.GetInstance().RestoreProduct(111);
+                                        break;
+                                    case PURCHASE_CONSUMEALL:
+                                        Purchase.GetInstance().ConsumeAll(111);
+                                        break;
+                                    case ADJUST_EVENT1:
+                                        // Handle ADJUST_EVENT1
+                                        break;
+                                    case ADJUST_EVENT2:
+                                        // Handle ADJUST_EVENT2
+                                        break;
+                                    case UMG_EVENT1:
+                                        // Handle UMG_EVENT1
+                                        break;
+                                    case UMG_EVENT2:
+                                        // Handle UMG_EVENT2
+                                        break;
+                                    case ETC1_EVENT1:
+                                        // Handle ETC1_EVENT1
+                                        break;
+                                    case ETC1_EVENT2:
+                                        // Handle ETC1_EVENT2
+                                        break;
+                                    case ETC2_EVENT1:
+                                        // Handle ETC2_EVENT1
+                                        break;
+                                    case ETC2_EVENT2:
+                                        // Handle ETC2_EVENT2
+                                        break;
+                                    default:
+                                        // Handle other actions
+                                        Log.d(TAG, "Action :  " + action.toString());
+                                        break;
+                                }
+                            }
+                            else {
+                                Log.d(TAG, "Action is null ");
                             }
                         }
                     });
@@ -297,18 +409,18 @@ public class MainActivity extends Activity
             }
         }
 
-        private UserAction.Action generateButtonText(String title, int index) {
-            // Generate button text based on page title and button index
-            return UserAction.getActionByIndex(title, index);
-            //return title + " " + index;
-        }
 
-        private void generateButtonText(String buttonText, TextView infoTextView)  {
-            Log.d(TAG, "Google button clicked: " + buttonText );
+//        private UserAction.Action generateButtonText(String title, int index) {
+//            // Generate button text based on page title and button index
+//            return UserAction.getActionByIndex(title, index);
+//            //return title + " " + index;
+//        }
+
+        private void generateButtonText(String title, int index) {
+            String buttonText = title + " " + index;
             UserAction.Action action = UserAction.fromString(buttonText);
 
-            if (action!=null)
-            {
+            if (action != null) {
                 switch (action) {
                     case GOOGLE_SIGN:
                         Google.GetInstance().GoogleSign();
@@ -320,7 +432,7 @@ public class MainActivity extends Activity
                         break;
                     case GOOGLE_PLAY_SERVICE_SIGN:
                         // 람다 표현식으로 GooglePlayServiceSign 사용
-                        Google.GetInstance().GooglePlayServiceSign( (success, playerId) -> {
+                        Google.GetInstance().GooglePlayServiceSign((success, playerId) -> {
                             String resultStr = "GOOGLE_PLAY_SERVICE_SIGN failed.";
                             if (success) {
                                 LGLog.d("", "Sign in successful! Player ID: " + playerId);
@@ -344,16 +456,17 @@ public class MainActivity extends Activity
                                         if (task.isSuccessful()) {
                                             // 게임 콘텐츠가 성공적으로 저장되었을 때의 처리
                                             // 예를 들어, 사용자에게 저장 완료 메시지를 표시하거나 UI를 업데이트할 수 있습니다.
-                                            LGLog.d("","lss GoogleCloudSave Success : " + task.toString());
+                                            LGLog.d("", "lss GoogleCloudSave Success : " + task.toString());
                                             infoTextView.setText("Success GoogleCloudSave");
                                         } else {
                                             // 저장이 실패한 경우 처리
                                             Exception e = task.getException();
-                                            LGLog.d("","lss GoogleCloudSave Error : " + e.toString());
+                                            LGLog.d("", "lss GoogleCloudSave Error : " + e.toString());
                                             // 에러 메시지를 표시하거나 적절한 오류 처리를 수행합니다.
                                             infoTextView.setText(" GoogleCloudSave Error : " + e.toString());
                                         }
-                                    }});
+                                    }
+                                });
                         break;
                     case GOOGLE_CLOUD_LOAD:
                         Google.GetInstance().loadSnapshot(getString(R.string.SaveLoadName)).addOnCompleteListener(new OnCompleteListener<String>() {
@@ -385,21 +498,20 @@ public class MainActivity extends Activity
                             Log.d(TAG, "Purchase 2 Spinner Item: " + item);
                             Purchase.GetInstance().RegisterProduct(item);
                         }
-                        Purchase.GetInstance().RefreshProductInfo( 111);
+                        Purchase.GetInstance().RefreshProductInfo(111);
                         break;
                     case PURCHASE_BUYPURCHASE:
                         Purchase.GetInstance().BuyProduct(getSelectedProductId(), "", 111);
                         break;
                     case PURCHASE_CONSUME:
                         try {
-                            Purchase.GetInstance().Consume(getSelectedProductId(),111);
-                        } catch (Exception e)
-                        {
+                            Purchase.GetInstance().Consume(getSelectedProductId(), 111);
+                        } catch (Exception e) {
 
                         }
                         break;
                     case PURCHASE_RESTORE:
-                        Purchase.GetInstance().RestoreProduct (111);
+                        Purchase.GetInstance().RestoreProduct(111);
                         break;
                     case PURCHASE_CONSUMEALL:
                         Purchase.GetInstance().ConsumeAll(111);
@@ -415,11 +527,11 @@ public class MainActivity extends Activity
                     default:
                         // Login canceled due to other error
                 }
-            }
-            else {
-                Log.d(TAG, "action is null  " + action );
+            } else {
+                Log.d(TAG, "action is null  " + action);
             }
         }
+
 
         @Override
         public int getItemCount() {
