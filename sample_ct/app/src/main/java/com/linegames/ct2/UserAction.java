@@ -20,6 +20,7 @@ public class UserAction {
         PURCHASE_CONSUME,
         PURCHASE_RESTORE,
         PURCHASE_CONSUMEALL,
+        PURCHASE_SENDEMAILRECEIPTINFO,
         ADJUST_EVENT1,
         ADJUST_EVENT2,
         UMG_EVENT1,
@@ -30,10 +31,19 @@ public class UserAction {
         ETC2_EVENT2
     }
 
+    public enum AndroidFunction {
+        GOOGLE,
+        PURCHASE,
+        ANDROID,
+        Adjust,
+        Line
+    }
+
+
     // Map to store the mapping between button texts and actions
     private static final Map<String, Action> actionMap = new HashMap<>();
 
-    static {
+    static {//Button Display
         // Initialize the mapping
         actionMap.put("GOOGLE 1", Action.GOOGLE_SIGN);
         actionMap.put("GOOGLE 2", Action.GOOGLE_SIGN_OUT);
@@ -47,6 +57,7 @@ public class UserAction {
         actionMap.put("PURCHASE 4", Action.PURCHASE_CONSUME);
         actionMap.put("PURCHASE 5", Action.PURCHASE_RESTORE);
         actionMap.put("PURCHASE 6", Action.PURCHASE_CONSUMEALL);
+        actionMap.put("PURCHASE 7", Action.PURCHASE_SENDEMAILRECEIPTINFO);
         actionMap.put("ADJUST 1", Action.ADJUST_EVENT1);
         actionMap.put("ADJUST 2", Action.ADJUST_EVENT2);
         actionMap.put("UMG 1", Action.UMG_EVENT1);

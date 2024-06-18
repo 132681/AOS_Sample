@@ -1,9 +1,13 @@
 package com.linegames.ct2;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +45,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.app.AlertDialog;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends Activity
 {
     private static ViewPager2 viewPager;
@@ -59,6 +69,9 @@ public class MainActivity extends Activity
     private static final int PERMISSIONS_REQUEST = 0x0000001;
     public static final int RC_SIGN_IN_GOOGLE_SIGN_IN = 1001;
     public static final int RC_SIGN_IN_GOOGLE_PLAY_SERVICES_SIGN_IN = 1002;
+
+    private static String email_receipt = "email_receipt";
+    private static String email_signature = "email_signature";
 
     public static TextView infoTextView;
 
@@ -98,8 +111,9 @@ public class MainActivity extends Activity
         Log.d(TAG, "targetSdkVersion : " + targetSdkVersion);
 
         titles = new ArrayList<>();
-        titles.add("GOOGLE");
-        titles.add("PURCHASE");//        titles.add("LogView");
+        titles.add(UserAction.AndroidFunction.GOOGLE.name());
+        titles.add(UserAction.AndroidFunction.PURCHASE.name());//        titles.add("LogView");
+        titles.add(UserAction.AndroidFunction.ANDROID.name());
 //        titles.add("Adjust");
 //        titles.add("UMG");
 //        titles.add("ETC1_");
@@ -161,6 +175,17 @@ public class MainActivity extends Activity
     public static void UpdateInfoText(String status, String sInfoData)
     {
         LGLog.d("lss UpdateInfoText titles : " + pagerAdapter.titles);
+
+        try {
+            JSONObject receiptObj = new JSONObject(sInfoData);
+
+            if (receiptObj.has("products"))
+                email_receipt = receiptObj.getString("products");
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
         infoTextView = pagerAdapter.getInfoTextView( pagerAdapter.viewPager.getCurrentItem());
         if (infoTextView != null) {
             infoTextView.setText(status + "" + sInfoData);
@@ -299,7 +324,7 @@ public class MainActivity extends Activity
                                             String resultStr = "GOOGLE_PLAY_SERVICE_SIGN failed.";
                                             if (success) {
                                                 LGLog.d("", "Sign in successful! Player ID: " + playerId);
-                                                resultStr = "Sign in successful! Player ID: " + playerId;
+                                                resultStr = "GOOGLE_PLAY_SERVICE_SIGN successful! \nPlayer ID: " + playerId;
                                             } else {
                                                 LGLog.d("", "Sign in failed.");
                                             }
@@ -368,6 +393,9 @@ public class MainActivity extends Activity
                                         break;
                                     case PURCHASE_CONSUMEALL:
                                         Purchase.GetInstance().ConsumeAll(111);
+                                        break;
+                                    case PURCHASE_SENDEMAILRECEIPTINFO:
+                                        sendEmailToAdmin();
                                         break;
                                     case ADJUST_EVENT1:
                                         // Handle ADJUST_EVENT1
@@ -594,6 +622,20 @@ public class MainActivity extends Activity
                 }
             }
         }
+    }
+
+    private List<String> emailList = new ArrayList<>();
+    public void sendEmailToAdmin()
+    {
+        String title = "Android Test Receipt";
+//        String[] receivers = new String[]{"god0@line.games"};
+        String[] receivers = null;
+        Intent email = new Intent(Intent.ACTION_SEND);
+        email.putExtra(Intent.EXTRA_SUBJECT, title);
+        email.putExtra(Intent.EXTRA_EMAIL, receivers);
+        email.putExtra(Intent.EXTRA_TEXT, String.format("receipt : %s ", email_receipt));
+        email.setType("message/rfc822");
+        LGBase.getMainActivity().startActivity(email);
     }
 
     @Override
