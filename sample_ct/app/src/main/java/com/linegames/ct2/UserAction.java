@@ -21,6 +21,10 @@ public class UserAction {
         PURCHASE_RESTORE,
         PURCHASE_CONSUMEALL,
         PURCHASE_SENDEMAILRECEIPTINFO,
+        FCM_NOTI_REGISTE,
+        FCM_NOTI_SHOW,
+        FCM_NOTI_SETTIMER,
+        FCM_NOTI_LOCAL,
         ADJUST_EVENT1,
         ADJUST_EVENT2,
         UMG_EVENT1,
@@ -34,7 +38,8 @@ public class UserAction {
     public enum AndroidFunction {
         GOOGLE,
         PURCHASE,
-        ANDROID,
+        NOTIFICATION,
+//        ANDROID,
         Adjust,
         Line
     }
@@ -58,6 +63,10 @@ public class UserAction {
         actionMap.put("PURCHASE 5", Action.PURCHASE_RESTORE);
         actionMap.put("PURCHASE 6", Action.PURCHASE_CONSUMEALL);
         actionMap.put("PURCHASE 7", Action.PURCHASE_SENDEMAILRECEIPTINFO);
+        actionMap.put("NOTIFICATION 1", Action.FCM_NOTI_REGISTE);
+        actionMap.put("NOTIFICATION 2", Action.FCM_NOTI_SHOW);
+        actionMap.put("NOTIFICATION 3", Action.FCM_NOTI_SETTIMER);
+        actionMap.put("NOTIFICATION 4", Action.FCM_NOTI_LOCAL);
         actionMap.put("ADJUST 1", Action.ADJUST_EVENT1);
         actionMap.put("ADJUST 2", Action.ADJUST_EVENT2);
         actionMap.put("UMG 1", Action.UMG_EVENT1);
@@ -71,7 +80,7 @@ public class UserAction {
     // Method to get Action by button text and convert to string
     public static String getActionByIndex(String title, int index) {
         String buttonText = title + " " + index;
-        Log.d("", "lss getActionByIndex ======================== buttonText : " + buttonText);
+        //Log.d("", "lss getActionByIndex ======================== buttonText : " + buttonText);
 
         Action action = actionMap.get(buttonText);
         return action != null ? action.name() : null;
@@ -79,7 +88,7 @@ public class UserAction {
 
     // Method to get Action by button text
     public static Action fromString(String buttonText) {
-        Log.d("", "lss fromString ======================== buttonText : " + buttonText);
+        //Log.d("", "lss fromString ======================== buttonText : " + buttonText);
         return actionMap.get(buttonText);
     }
 }

@@ -29,6 +29,7 @@ import com.google.android.gms.tasks.Task;
 import com.linecorp.linesdk.auth.LineLoginApi;
 import com.linecorp.linesdk.auth.LineLoginResult;
 import com.linegames.Line;
+import com.linegames.NotiFCMService;
 import com.linegames.Purchase;
 import com.linegames.PurchaseGalaxy;
 import com.linegames.auth.Facebook;
@@ -101,19 +102,21 @@ public class MainActivity extends Activity
 
         setContentView(R.layout.activity_main);
 
-        Log.d(TAG, "stringFromJNI : " + stringFromJNI());
+        Log.d(TAG, "lss stringFromJNI : " + stringFromJNI());
 
         LGBase.getInstance().onCreate( this );
 
         Google.GetInstance().StartGoogleSign();
 
+        NotiFCMService.Companion.start("icon","1:764920947053:android:3a48ce8f849f332794ba64");
+
         int targetSdkVersion = getApplicationContext().getApplicationInfo().targetSdkVersion;
-        Log.d(TAG, "targetSdkVersion : " + targetSdkVersion);
+        Log.d(TAG, "lss targetSdkVersion : " + targetSdkVersion);
 
         titles = new ArrayList<>();
         titles.add(UserAction.AndroidFunction.GOOGLE.name());
-        titles.add(UserAction.AndroidFunction.PURCHASE.name());//        titles.add("LogView");
-        titles.add(UserAction.AndroidFunction.ANDROID.name());
+        titles.add(UserAction.AndroidFunction.PURCHASE.name());
+        titles.add(UserAction.AndroidFunction.NOTIFICATION.name());
 //        titles.add("Adjust");
 //        titles.add("UMG");
 //        titles.add("ETC1_");
@@ -174,8 +177,7 @@ public class MainActivity extends Activity
 
     public static void UpdateInfoText(String status, String sInfoData)
     {
-        LGLog.d("lss UpdateInfoText titles : " + pagerAdapter.titles);
-
+        //LGLog.d("lss UpdateInfoText titles : " + pagerAdapter.titles);
         try {
             JSONObject receiptObj = new JSONObject(sInfoData);
 
@@ -218,7 +220,7 @@ public class MainActivity extends Activity
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             // 기타 페이지인 경우 기존의 item_page.xml을 사용
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_page, parent, false);
-            Log.d(TAG, "lss onCreateViewHolder Etc");
+            //Log.d(TAG, "lss onCreateViewHolder Etc");
             return new ViewHolder(view);
         }
 
@@ -228,7 +230,6 @@ public class MainActivity extends Activity
             int virtualPosition = position % titles.size();
             String title = titles.get(virtualPosition);
             holder.titleTextView.setText(title);
-            Log.d(TAG, "lss onBindViewHolder ========================");
 
 //            // Set up spinner for Purchase page only
 //            if (title.equals("Purchase")) {
@@ -239,7 +240,6 @@ public class MainActivity extends Activity
 
             // Set infotextview based on page title
             holder.infoTextView.setText(title);
-            Log.d(TAG, "lss onBindViewHolder ======================== title : " + title);
 
             // Set text information for each page
             switch (title) {
@@ -248,6 +248,9 @@ public class MainActivity extends Activity
                     break;
                 case "Purchase":
                     holder.infoTextView.setText("Purchase information");
+                    break;
+                case "Noti":
+                    holder.infoTextView.setText("Notification information");
                     break;
                 case "Adjust":
                     holder.infoTextView.setText("Adjust information");
@@ -262,13 +265,11 @@ public class MainActivity extends Activity
                     holder.infoTextView.setText("ETC2 information");
                     break;
             }
-            Log.d(TAG, "lss onBindViewHolder ======================== 1 title : " + title);
             // Set OnClickListener for each button
             for (int i = 0; i < 10; i++) {
-                Log.d(TAG, "lss onBindViewHolder ======================== 2 title : " + title);
                 int tempi = i;
                 String buttonText = UserAction.getActionByIndex(title, tempi + 1); // Generate button text based on page title and button index
-                LGLog.d("", "lss buttonText : " + buttonText);
+                //LGLog.d("", "lss buttonText : " + buttonText);
                 Button button = null;
                 switch (i) {
                     case 0:
@@ -302,12 +303,9 @@ public class MainActivity extends Activity
                         public void onClick(View v) {
                             // Call corresponding class's function based on button text
                             String actionText = UserAction.getActionByIndex(title, tempi + 1); // Generate button text based on page title and button index
-                            LGLog.d("", "lss onClick actionText : " + actionText);
+                            //LGLog.d("", "lss onClick actionText : " + actionText);
 
                             UserAction.Action action = UserAction.fromString(title + " " + (tempi + 1));
-
-                            if (action != null)
-                                LGLog.d("", "lss onClick actionText str : " + action.toString());
 
                             if (action != null) {
                                 switch (action) {
@@ -320,53 +318,45 @@ public class MainActivity extends Activity
                                         holder.infoTextView.setText("GoogleSignOut");
                                         break;
                                     case GOOGLE_PLAY_SERVICE_SIGN:
-                                        Google.GetInstance().GooglePlayServiceSign((success, playerId) -> {
-                                            String resultStr = "GOOGLE_PLAY_SERVICE_SIGN failed.";
-                                            if (success) {
-                                                LGLog.d("", "Sign in successful! Player ID: " + playerId);
-                                                resultStr = "GOOGLE_PLAY_SERVICE_SIGN successful! \nPlayer ID: " + playerId;
-                                            } else {
-                                                LGLog.d("", "Sign in failed.");
-                                            }
-                                            holder.infoTextView.setText(resultStr);
-                                        });
+                                        Google.GetInstance().GooglePlayServiceSign();
+//                                            holder.infoTextView.setText(resultStr);
                                         break;
                                     case GOOGLE_CLOUD_LIST:
-                                        Google.GetInstance().signInSilently();
+  //                                      Google.GetInstance().signInSilently();
                                         holder.infoTextView.setText("GoogleCloud List");
                                         break;
-                                    case GOOGLE_CLOUD_SAVE:
-                                        Google.GetInstance().writeSnapshot(v.getContext().getString(R.string.SaveLoadName), v.getContext().getString(R.string.SaveData), v.getContext().getString(R.string.Desc))
-                                                .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<SnapshotMetadata> task) {
-                                                        if (task.isSuccessful()) {
-                                                            LGLog.d("", "lss GoogleCloudSave Success : " + task.toString());
-                                                            holder.infoTextView.setText("Success GoogleCloudSave");
-                                                        } else {
-                                                            Exception e = task.getException();
-                                                            LGLog.d("", "lss GoogleCloudSave Error : " + e.toString());
-                                                            holder.infoTextView.setText(" GoogleCloudSave Error : " + e.toString());
-                                                        }
-                                                    }
-                                                });
-                                        break;
-                                    case GOOGLE_CLOUD_LOAD:
-                                        Google.GetInstance().loadSnapshot(v.getContext().getString(R.string.SaveLoadName)).addOnCompleteListener(new OnCompleteListener<String>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<String> task) {
-                                                if (task.isSuccessful()) {
-                                                    String snapshotData = task.getResult();
-                                                    Log.d(TAG, "lss GoogleCloudLoad Success : " + snapshotData);
-                                                    holder.infoTextView.setText("Success GoogleCloudLoad : " + snapshotData);
-                                                } else {
-                                                    Exception e = task.getException();
-                                                    Log.d(TAG, "lss GoogleCloudLoad Error e : " + e.toString());
-                                                    holder.infoTextView.setText("GoogleCloudLoad Error : " + e.toString());
-                                                }
-                                            }
-                                        });
-                                        break;
+//                                    case GOOGLE_CLOUD_SAVE:
+//                                        Google.GetInstance().writeSnapshot(v.getContext().getString(R.string.SaveLoadName), v.getContext().getString(R.string.SaveData), v.getContext().getString(R.string.Desc))
+//                                                .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
+//                                                    @Override
+//                                                    public void onComplete(@NonNull Task<SnapshotMetadata> task) {
+//                                                        if (task.isSuccessful()) {
+//                                                            LGLog.d("", "lss GoogleCloudSave Success : " + task.toString());
+//                                                            holder.infoTextView.setText("Success GoogleCloudSave");
+//                                                        } else {
+//                                                            Exception e = task.getException();
+//                                                            LGLog.d("", "lss GoogleCloudSave Error : " + e.toString());
+//                                                            holder.infoTextView.setText(" GoogleCloudSave Error : " + e.toString());
+//                                                        }
+//                                                    }
+//                                                });
+//                                        break;
+//                                    case GOOGLE_CLOUD_LOAD:
+//                                        Google.GetInstance().loadSnapshot(v.getContext().getString(R.string.SaveLoadName)).addOnCompleteListener(new OnCompleteListener<String>() {
+//                                            @Override
+//                                            public void onComplete(@NonNull Task<String> task) {
+//                                                if (task.isSuccessful()) {
+//                                                    String snapshotData = task.getResult();
+//                                                    Log.d(TAG, "lss GoogleCloudLoad Success : " + snapshotData);
+//                                                    holder.infoTextView.setText("Success GoogleCloudLoad : " + snapshotData);
+//                                                } else {
+//                                                    Exception e = task.getException();
+//                                                    Log.d(TAG, "lss GoogleCloudLoad Error e : " + e.toString());
+//                                                    holder.infoTextView.setText("GoogleCloudLoad Error : " + e.toString());
+//                                                }
+//                                            }
+//                                        });
+//                                        break;
                                     case PURCHASE_CONNECT:
                                         Purchase.GetInstance().Connect("", 111);
                                         break;
@@ -396,6 +386,15 @@ public class MainActivity extends Activity
                                         break;
                                     case PURCHASE_SENDEMAILRECEIPTINFO:
                                         sendEmailToAdmin();
+                                        break;
+                                    case FCM_NOTI_REGISTE:
+                                        NotiFCMService.Companion.start("","1:764920947053:android:3a48ce8f849f332794ba64");
+                                        break;
+                                    case FCM_NOTI_SHOW:
+                                        break;
+                                    case FCM_NOTI_SETTIMER:
+                                        break;
+                                    case FCM_NOTI_LOCAL:
                                         break;
                                     case ADJUST_EVENT1:
                                         // Handle ADJUST_EVENT1
@@ -459,61 +458,51 @@ public class MainActivity extends Activity
                         break;
                     case GOOGLE_PLAY_SERVICE_SIGN:
                         // 람다 표현식으로 GooglePlayServiceSign 사용
-                        Google.GetInstance().GooglePlayServiceSign((success, playerId) -> {
-                            String resultStr = "GOOGLE_PLAY_SERVICE_SIGN failed.";
-                            if (success) {
-                                LGLog.d("", "Sign in successful! Player ID: " + playerId);
-                                resultStr = "Sign in successful! Player ID: " + playerId;
-                            } else {
-                                LGLog.d("", "Sign in failed.");
-                            }
-                            infoTextView.setText(resultStr);
-                        });
-
+                        Google.GetInstance().GooglePlayServiceSign();
                         break;
                     case GOOGLE_CLOUD_LIST:
-                        Google.GetInstance().signInSilently();
-                        infoTextView.setText("GoogleCloud List");
+//                        Google.GetInstance().signInSilently();
+//                        infoTextView.setText("GoogleCloud List");
                         break;
                     case GOOGLE_CLOUD_SAVE:
-                        Google.GetInstance().writeSnapshot(getString(R.string.SaveLoadName), getString(R.string.SaveData), getString(R.string.Desc))
-                                .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<SnapshotMetadata> task) {
-                                        if (task.isSuccessful()) {
-                                            // 게임 콘텐츠가 성공적으로 저장되었을 때의 처리
-                                            // 예를 들어, 사용자에게 저장 완료 메시지를 표시하거나 UI를 업데이트할 수 있습니다.
-                                            LGLog.d("", "lss GoogleCloudSave Success : " + task.toString());
-                                            infoTextView.setText("Success GoogleCloudSave");
-                                        } else {
-                                            // 저장이 실패한 경우 처리
-                                            Exception e = task.getException();
-                                            LGLog.d("", "lss GoogleCloudSave Error : " + e.toString());
-                                            // 에러 메시지를 표시하거나 적절한 오류 처리를 수행합니다.
-                                            infoTextView.setText(" GoogleCloudSave Error : " + e.toString());
-                                        }
-                                    }
-                                });
+//                        Google.GetInstance().writeSnapshot(getString(R.string.SaveLoadName), getString(R.string.SaveData), getString(R.string.Desc))
+//                                .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
+//                                    @Override
+//                                    public void onComplete(@NonNull Task<SnapshotMetadata> task) {
+//                                        if (task.isSuccessful()) {
+//                                            // 게임 콘텐츠가 성공적으로 저장되었을 때의 처리
+//                                            // 예를 들어, 사용자에게 저장 완료 메시지를 표시하거나 UI를 업데이트할 수 있습니다.
+//                                            LGLog.d("", "lss GoogleCloudSave Success : " + task.toString());
+//                                            infoTextView.setText("Success GoogleCloudSave");
+//                                        } else {
+//                                            // 저장이 실패한 경우 처리
+//                                            Exception e = task.getException();
+//                                            LGLog.d("", "lss GoogleCloudSave Error : " + e.toString());
+//                                            // 에러 메시지를 표시하거나 적절한 오류 처리를 수행합니다.
+//                                            infoTextView.setText(" GoogleCloudSave Error : " + e.toString());
+//                                        }
+//                                    }
+//                                });
                         break;
                     case GOOGLE_CLOUD_LOAD:
-                        Google.GetInstance().loadSnapshot(getString(R.string.SaveLoadName)).addOnCompleteListener(new OnCompleteListener<String>() {
-                            @Override
-                            public void onComplete(@NonNull Task<String> task) {
-                                if (task.isSuccessful()) {
-                                    // 작업이 성공적으로 완료됐을 때
-                                    String snapshotData = task.getResult();
-                                    Log.d(TAG, "lss GoogleCloudLoad Success : " + snapshotData);
-                                    // snapshotData를 사용하여 필요한 작업을 수행합니다.
-                                    infoTextView.setText("Success GoogleCloudLoad : " + snapshotData);
-                                } else {
-                                    // 작업이 실패했을 때
-                                    Exception e = task.getException();
-                                    // 실패 이유를 처리합니다.
-                                    Log.d(TAG, "lss GoogleCloudLoad Error e : " + e.toString());
-                                    infoTextView.setText("GoogleCloudLoad Error : " + e.toString());
-                                }
-                            }
-                        });
+//                        Google.GetInstance().loadSnapshot(getString(R.string.SaveLoadName)).addOnCompleteListener(new OnCompleteListener<String>() {
+//                            @Override
+//                            public void onComplete(@NonNull Task<String> task) {
+//                                if (task.isSuccessful()) {
+//                                    // 작업이 성공적으로 완료됐을 때
+//                                    String snapshotData = task.getResult();
+//                                    Log.d(TAG, "lss GoogleCloudLoad Success : " + snapshotData);
+//                                    // snapshotData를 사용하여 필요한 작업을 수행합니다.
+//                                    infoTextView.setText("Success GoogleCloudLoad : " + snapshotData);
+//                                } else {
+//                                    // 작업이 실패했을 때
+//                                    Exception e = task.getException();
+//                                    // 실패 이유를 처리합니다.
+//                                    Log.d(TAG, "lss GoogleCloudLoad Error e : " + e.toString());
+//                                    infoTextView.setText("GoogleCloudLoad Error : " + e.toString());
+//                                }
+//                            }
+//                        });
                         break;
                     case PURCHASE_CONNECT:
                         Purchase.GetInstance().Connect("", 111);
@@ -542,6 +531,14 @@ public class MainActivity extends Activity
                         break;
                     case PURCHASE_CONSUMEALL:
                         Purchase.GetInstance().ConsumeAll(111);
+                        break;
+                    case FCM_NOTI_REGISTE:
+                        break;
+                    case FCM_NOTI_SHOW:
+                        break;
+                    case FCM_NOTI_SETTIMER:
+                        break;
+                    case FCM_NOTI_LOCAL:
                         break;
                     case ADJUST_EVENT1:
                         break;

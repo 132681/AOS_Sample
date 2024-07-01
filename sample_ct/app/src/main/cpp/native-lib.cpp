@@ -1,14 +1,14 @@
 #include <jni.h>
 #include <string>
 #include <android/log.h>
-#include <ncm/jni.h>
+//#include <ncm/jni.h>
 #define LOG_TAG "NTSDK"
 #define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG , LOG_TAG, __VA_ARGS__)
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO , LOG_TAG, __VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN , LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR , LOG_TAG, __VA_ARGS__)
-using namespace NCM;
+//using namespace NCM;
 
 extern "C" JNIEXPORT jstring JNICALL Java_com_linegames_ct2_MainActivity_stringFromJNI(
         JNIEnv *env,
@@ -120,6 +120,46 @@ extern "C" JNIEXPORT void JNICALL Java_com_linegames_Purchase_nativeCB(
     const char *str_status = env->GetStringUTFChars(status, NULL);
     const char *str_msg = env->GetStringUTFChars(msg, NULL);
 
+//    jclass cls = env->FindClass("com/linegames/ct2/MainActivity");
+//    if (cls == NULL) {
+//        LOGE("Failed to find MainActivity class");
+//        env->ReleaseStringUTFChars(status, str_status);
+//        env->ReleaseStringUTFChars(msg, str_msg);
+//        return;
+//    }
+//
+//    // UpdateInfoText 메서드의 ID 가져오기
+//    jmethodID methodID = env->GetStaticMethodID(cls, "UpdateInfoText", "(Ljava/lang/String;Ljava/lang/String;)V");
+//    if (methodID == NULL) {
+//        LOGE("Failed to find UpdateInfoText method");
+//        env->ReleaseStringUTFChars(status, str_status);
+//        env->ReleaseStringUTFChars(msg, str_msg);
+//        return;
+//    }
+//
+//    // 메서드 호출
+//    env->CallStaticVoidMethod(cls, methodID, status, msg);
+//    if (env->ExceptionCheck()) {
+//        env->ExceptionDescribe();
+//        env->ExceptionClear();
+//        LOGE("Exception occurred while calling UpdateInfoText");
+//    }
+//
+//    // C 문자열 해제
+//    env->ReleaseStringUTFChars(status, str_status);
+//    env->ReleaseStringUTFChars(msg, str_msg);
+    LOGD("^^^^ Purchase Native CB status %s msg %s userCB %ld ^^^^", str_status, str_msg, userCB);
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_linegames_FCMNoti_nativeCB(
+        JNIEnv *env,
+        jobject ,
+        jstring status,
+        jstring msg,
+        jlong userCB) {
+    const char *str_status = env->GetStringUTFChars(status, NULL);
+    const char *str_msg = env->GetStringUTFChars(msg, NULL);
+
     jclass cls = env->FindClass("com/linegames/ct2/MainActivity");
     if (cls == NULL) {
         LOGE("Failed to find MainActivity class");
@@ -129,7 +169,8 @@ extern "C" JNIEXPORT void JNICALL Java_com_linegames_Purchase_nativeCB(
     }
 
     // UpdateInfoText 메서드의 ID 가져오기
-    jmethodID methodID = env->GetStaticMethodID(cls, "UpdateInfoText", "(Ljava/lang/String;Ljava/lang/String;)V");
+    jmethodID methodID = env->GetStaticMethodID(cls, "UpdateInfoText",
+                                                "(Ljava/lang/String;Ljava/lang/String;)V");
     if (methodID == NULL) {
         LOGE("Failed to find UpdateInfoText method");
         env->ReleaseStringUTFChars(status, str_status);
@@ -150,6 +191,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_linegames_Purchase_nativeCB(
     env->ReleaseStringUTFChars(msg, str_msg);
     LOGD("^^^^ Purchase Native CB status %s msg %s userCB %ld ^^^^", str_status, str_msg, userCB);
 }
+
 
 extern "C" JNIEXPORT void JNICALL Java_com_linegames_PurchaseSub_nativeCB(
         JNIEnv *env,
