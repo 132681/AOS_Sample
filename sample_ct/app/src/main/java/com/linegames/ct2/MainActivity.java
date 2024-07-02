@@ -39,7 +39,10 @@ import com.linegames.base.LGLog;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import androidx.annotation.NonNull;
@@ -91,7 +94,15 @@ public class MainActivity extends Activity
         this.selectedProductId = selectedProductId;
     }
 
+    public String getSelectedStore() {
+        return selectedStore;
+    }
+    public void setSelectedStore(String selectedStore) {
+        this.selectedStore = selectedStore;
+    }
+
     private String selectedProductId = "cointop2_google_play_gem100";
+    private String selectedStore = "googlePlay";
 
     public native String stringFromJNI();
     //public native String LoginReciever(int status, String jsAccessToken, String jsMsg);
@@ -199,10 +210,37 @@ public class MainActivity extends Activity
     // getSpinnerItems 메소드를 static으로 변경
     public List<String> getSpinnerItems() {
         List<String> items = new ArrayList<>();
-        items.add("cointop2_google_play_gem100");
-        items.add("cointop2_google_play_gem300");
-        items.add("cointop2_google_play_gem500");
-        items.add("cointop2_google_play_gem800");
+
+        if (selectedStore.equals(UserAction.storeList.GOOGLE.name()))
+        {
+            items.add("cointop2_google_play_gem100");
+            items.add("cointop2_google_play_gem300");
+            items.add("cointop2_google_play_gem500");
+            items.add("cointop2_google_play_gem800");
+        }
+        else if (selectedStore.equals(UserAction.storeList.ONESTORE.name())){
+            items.add("cointop2_oneStore_gem100");
+            items.add("cointop2_oneStore_gem300");
+            items.add("cointop2_oneStore_gem500");
+            items.add("cointop2_oneStore_gem800");
+        }
+        else if (selectedStore.equals(UserAction.storeList.GALAXY.name())){
+            items.add("cointop2_galaxy_gem100");
+            items.add("cointop2_galaxy_gem300");
+            items.add("cointop2_galaxy_gem500");
+            items.add("cointop2_galaxy_gem800");
+        }
+        else {
+
+        }
+        return items;
+    }
+
+    public List<String> getstoreSpinnerItems() {
+        List<String> items = new ArrayList<>();
+        items.add(UserAction.storeList.GOOGLE.name());
+        items.add(UserAction.storeList.ONESTORE.name());
+        items.add(UserAction.storeList.GALAXY.name());
         return items;
     }
 
@@ -576,6 +614,8 @@ public class MainActivity extends Activity
             TextView titleTextView;
             TextView infoTextView;
             Spinner spinner;
+
+            Spinner storeSpinner;
             Button addButton1, addButton2, addButton3, addButton4, addButton5, addButton6, addButton7; // Add more buttons if needed
 
             public ViewHolder(@NonNull View itemView) {
@@ -591,6 +631,7 @@ public class MainActivity extends Activity
                 addButton7 = itemView.findViewById(R.id.addButton7);
 
                 spinner = itemView.findViewById(R.id.spinner); // 스피너 초기화
+                storeSpinner = itemView.findViewById(R.id.storeSpinner); // 스피너 초기화
 
                 if (spinner != null) {
                     // Spinner에 어댑터 설정
@@ -605,7 +646,7 @@ public class MainActivity extends Activity
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                             if (parent != null) {
                                 setSelectedProductId(parent.getItemAtPosition(position).toString());
-                                Toast.makeText(itemView.getContext(), parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(itemView.getContext(), parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
                             }
                         }
 
@@ -616,6 +657,57 @@ public class MainActivity extends Activity
                     });
                 } else {
                     Log.e("ViewHolder", "Spinner not found");
+                }
+
+                if (storeSpinner != null) {
+                    // Spinner에 어댑터 설정
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(itemView.getContext(),
+                            android.R.layout.simple_spinner_item, getstoreSpinnerItems());
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    storeSpinner.setAdapter(adapter);
+
+                    // 새로운 코드 추가
+                    storeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            if (parent != null) {
+                                String selectedStore = parent.getItemAtPosition(position).toString();
+                                setSelectedStore(selectedStore);
+                                updateProductSpinner(selectedStore);
+                                //Toast.makeText(itemView.getContext(), parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+                            // 아무 것도 하지 않음
+                        }
+                    });
+                } else {
+                    Log.e("ViewHolder", "Spinner not found");
+                }
+            }
+
+            private void updateProductSpinner(String selectedStore) {
+                List<String> productItems = getProductsForStore(selectedStore); // store에 해당하는 제품 목록 가져오기
+                ArrayAdapter<String> productAdapter = new ArrayAdapter<>(itemView.getContext(),
+                        android.R.layout.simple_spinner_item, productItems);
+                productAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinner.setAdapter(productAdapter);
+            }
+
+            private List<String> getProductsForStore(String store) {
+                // 예시 데이터
+                Map<String, List<String>> storeProducts = new HashMap<>();
+                storeProducts.put(UserAction.storeList.GOOGLE.name(), Arrays.asList("cointop2_google_play_gem100", "cointop2_google_play_gem300", "cointop2_google_play_gem500", "cointop2_google_play_gem800"));
+                storeProducts.put(UserAction.storeList.ONESTORE.name(), Arrays.asList("cointop2_oneStore_gem100", "cointop2_oneStore_gem300", "cointop2_oneStore_gem500", "cointop2_oneStore_gem800"));
+                storeProducts.put(UserAction.storeList.GALAXY.name(), Arrays.asList("cointop2_galaxyStore_gem100", "cointop2_galaxyStore_gem300", "cointop2_galaxyStore_gem500", "cointop2_galaxyStore_gem800"));
+
+                // 해당 store에 대한 제품 목록 반환
+                if (storeProducts.containsKey(store)) {
+                    return storeProducts.get(store);
+                } else {
+                    return new ArrayList<>();
                 }
             }
         }

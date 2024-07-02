@@ -44,6 +44,12 @@ public class UserAction {
         Line
     }
 
+    public enum storeList {
+        GOOGLE,
+        ONESTORE,
+        GALAXY,
+    }
+
 
     // Map to store the mapping between button texts and actions
     private static final Map<String, Action> actionMap = new HashMap<>();
