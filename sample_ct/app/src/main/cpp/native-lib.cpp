@@ -151,6 +151,47 @@ extern "C" JNIEXPORT void JNICALL Java_com_linegames_Purchase_nativeCB(
     LOGD("^^^^ Purchase Native CB status %s msg %s userCB %ld ^^^^", str_status, str_msg, userCB);
 }
 
+
+extern "C" JNIEXPORT void JNICALL Java_com_linegames_PurchaseOneStore_nativeCB(
+        JNIEnv *env,
+        jobject ,
+        jstring status,
+        jstring msg,
+        jlong userCB) {
+    const char *str_status = env->GetStringUTFChars(status, NULL);
+    const char *str_msg = env->GetStringUTFChars(msg, NULL);
+
+//    jclass cls = env->FindClass("com/linegames/ct2/MainActivity");
+//    if (cls == NULL) {
+//        LOGE("Failed to find MainActivity class");
+//        env->ReleaseStringUTFChars(status, str_status);
+//        env->ReleaseStringUTFChars(msg, str_msg);
+//        return;
+//    }
+//
+//    // UpdateInfoText 메서드의 ID 가져오기
+//    jmethodID methodID = env->GetStaticMethodID(cls, "UpdateInfoText", "(Ljava/lang/String;Ljava/lang/String;)V");
+//    if (methodID == NULL) {
+//        LOGE("Failed to find UpdateInfoText method");
+//        env->ReleaseStringUTFChars(status, str_status);
+//        env->ReleaseStringUTFChars(msg, str_msg);
+//        return;
+//    }
+//
+//    // 메서드 호출
+//    env->CallStaticVoidMethod(cls, methodID, status, msg);
+//    if (env->ExceptionCheck()) {
+//        env->ExceptionDescribe();
+//        env->ExceptionClear();
+//        LOGE("Exception occurred while calling UpdateInfoText");
+//    }
+//
+//    // C 문자열 해제
+//    env->ReleaseStringUTFChars(status, str_status);
+//    env->ReleaseStringUTFChars(msg, str_msg);
+    LOGD("^^^^ PurchaseOneStore Native CB status %s msg %s userCB %ld ^^^^", str_status, str_msg, userCB);
+}
+
 extern "C" JNIEXPORT void JNICALL Java_com_linegames_FCMNoti_nativeCB(
         JNIEnv *env,
         jobject ,
@@ -189,7 +230,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_linegames_FCMNoti_nativeCB(
     // C 문자열 해제
     env->ReleaseStringUTFChars(status, str_status);
     env->ReleaseStringUTFChars(msg, str_msg);
-    LOGD("^^^^ Purchase Native CB status %s msg %s userCB %ld ^^^^", str_status, str_msg, userCB);
+    LOGD("^^^^ FCMNoti_nativeCB status %s msg %s userCB %ld ^^^^", str_status, str_msg, userCB);
 }
 
 
@@ -212,5 +253,5 @@ extern "C" JNIEXPORT void JNICALL Java_com_linegames_PurchaseGalaxy_nativeCB(
         jlong userCB) {
     const char *str_status = env->GetStringUTFChars(status, NULL);
     const char *str_msg = env->GetStringUTFChars(msg, NULL);
-    LOGD("^^^^ Purchase Galaxy Native CB status %s msg %s userCB %ld ^^^^", str_status, str_msg, userCB);
+    LOGD("^^^^ PurchaseSub CB status %s msg %s userCB %ld ^^^^", str_status, str_msg, userCB);
 }
