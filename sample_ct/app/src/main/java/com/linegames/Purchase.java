@@ -621,8 +621,6 @@ public class Purchase implements PurchasesUpdatedListener
                 LGLog.d("lss MainActivity.infoTextView == null"  );
             }
             MainActivity.UpdateInfoText( result_status, jsonResult.toString());//("Invoke() status : " + result_status + " msg : " + jsonResult.toString());
-
-
         }
     }
 

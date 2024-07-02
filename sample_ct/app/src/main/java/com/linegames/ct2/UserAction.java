@@ -97,4 +97,18 @@ public class UserAction {
         //Log.d("", "lss fromString ======================== buttonText : " + buttonText);
         return actionMap.get(buttonText);
     }
+
+    public static String storeListToString(storeList store) {
+        return store.name();
+    }
+
+    // Method to convert string to storeList enum
+    public static storeList stringToStoreList(String storeString) {
+        try {
+            return storeList.valueOf(storeString);
+        } catch (IllegalArgumentException e) {
+            // Handle the case where the string does not match any enum constant
+            return null;
+        }
+    }
 }

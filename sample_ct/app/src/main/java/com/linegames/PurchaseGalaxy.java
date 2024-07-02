@@ -22,6 +22,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import android.content.Intent;
+
+import com.linegames.ct2.MainActivity;
 import com.samsung.android.sdk.iap.lib.helper.HelperDefine.OperationMode;
 import com.samsung.android.sdk.iap.lib.helper.IapHelper;
 import com.samsung.android.sdk.iap.lib.listener.OnConsumePurchasedItemsListener;
@@ -139,6 +141,11 @@ public class PurchaseGalaxy
     {
         if ( !CheckInitlized( userCB ) ) return;
 
+        if (productIdArr == null)
+        {
+            GetInstance().Invoke( "UNKNOWN", null, "RefreshProductInfo() Success", 0 , userCB );
+            return;
+        }
         final int inputProductsCount = productIdArr.size();
         String              mConsumablePurchaseIDs = "";
         Intent intent = mMainActivity.getIntent();
@@ -568,7 +575,15 @@ public class PurchaseGalaxy
         if (userCB != noCB)
         {
             Debug( "Invoke() status : " + result_status + " msg : " + jsonResult.toString() + " userCB : " + userCB  );
-            nativeCB( result_status, jsonResult.toString(), userCB );
+            if (userCB != noCB)
+            {
+                nativeCB( result_status, jsonResult.toString(), userCB );
+                if (MainActivity.infoTextView == null)
+                {
+                    LGLog.d("lss MainActivity.infoTextView == null"  );
+                }
+                MainActivity.UpdateInfoText( result_status, jsonResult.toString());//("Invoke() status : " + result_status + " msg : " + jsonResult.toString());
+            }
         }
     }
 

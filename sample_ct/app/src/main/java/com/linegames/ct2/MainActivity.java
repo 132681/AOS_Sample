@@ -32,6 +32,7 @@ import com.linegames.Line;
 import com.linegames.NotiFCMService;
 import com.linegames.Purchase;
 import com.linegames.PurchaseGalaxy;
+import com.linegames.PurchaseManager;
 import com.linegames.auth.Facebook;
 import com.linegames.base.LGBase;
 import com.linegames.Google;
@@ -201,7 +202,7 @@ public class MainActivity extends Activity
 
         infoTextView = pagerAdapter.getInfoTextView( pagerAdapter.viewPager.getCurrentItem());
         if (infoTextView != null) {
-            infoTextView.setText(status + "" + sInfoData);
+            infoTextView.setText(status + " " + sInfoData);
         } else {
             LGLog.d("lss pagerAdapter: " + (pagerAdapter != null ? "Not null" : "Null"));
         }
@@ -396,7 +397,8 @@ public class MainActivity extends Activity
 //                                        });
 //                                        break;
                                     case PURCHASE_CONNECT:
-                                        Purchase.GetInstance().Connect("", 111);
+
+                                        PurchaseManager.GetInstance().Connect("", 111);
                                         break;
                                     case PURCHASE_REFRESHPRODUCTINFO:
                                         List<String> spinnerItems = getSpinnerItems();
@@ -404,23 +406,27 @@ public class MainActivity extends Activity
                                             Log.d(TAG, "Purchase 2 Spinner Item: " + item);
                                             Purchase.GetInstance().RegisterProduct(item);
                                         }
-                                        Purchase.GetInstance().RefreshProductInfo(111);
+                                        PurchaseManager.GetInstance().RefreshProductInfo(111);
                                         break;
                                     case PURCHASE_BUYPURCHASE:
-                                        Purchase.GetInstance().BuyProduct(getSelectedProductId(), "", 111);
+                                        PurchaseManager.GetInstance().BuyProduct(getSelectedProductId(), "", 111);
                                         break;
                                     case PURCHASE_CONSUME:
                                         try {
-                                            Purchase.GetInstance().Consume(getSelectedProductId(), 111);
+                                            PurchaseManager.GetInstance().Consume(getSelectedProductId(), 111);
                                         } catch (Exception e) {
                                             // Handle exception
                                         }
                                         break;
                                     case PURCHASE_RESTORE:
-                                        Purchase.GetInstance().RestoreProduct(111);
+                                        PurchaseManager.GetInstance().RestoreProduct(111);
                                         break;
                                     case PURCHASE_CONSUMEALL:
-                                        Purchase.GetInstance().ConsumeAll(111);
+                                        try {
+                                            PurchaseManager.GetInstance().ConsumeAll(111);
+                                        } catch (JSONException e) {
+                                            throw new RuntimeException(e);
+                                        }
                                         break;
                                     case PURCHASE_SENDEMAILRECEIPTINFO:
                                         sendEmailToAdmin();
@@ -480,7 +486,7 @@ public class MainActivity extends Activity
 //            //return title + " " + index;
 //        }
 
-        private void generateButtonText(String title, int index) {
+        private void generateButtonText(String title, int index) throws JSONException {
             String buttonText = title + " " + index;
             UserAction.Action action = UserAction.fromString(buttonText);
 
@@ -543,32 +549,32 @@ public class MainActivity extends Activity
 //                        });
                         break;
                     case PURCHASE_CONNECT:
-                        Purchase.GetInstance().Connect("", 111);
+                        PurchaseManager.GetInstance().Connect("", 111);
                         //infoTextView.setText("Google information");
                         break;
                     case PURCHASE_REFRESHPRODUCTINFO:
                         List<String> spinnerItems = getSpinnerItems();
                         for (String item : spinnerItems) {
                             Log.d(TAG, "Purchase 2 Spinner Item: " + item);
-                            Purchase.GetInstance().RegisterProduct(item);
+                            PurchaseManager.GetInstance().RegisterProduct(item);
                         }
-                        Purchase.GetInstance().RefreshProductInfo(111);
+                        PurchaseManager.GetInstance().RefreshProductInfo(111);
                         break;
                     case PURCHASE_BUYPURCHASE:
-                        Purchase.GetInstance().BuyProduct(getSelectedProductId(), "", 111);
+                        PurchaseManager.GetInstance().BuyProduct(getSelectedProductId(), "", 111);
                         break;
                     case PURCHASE_CONSUME:
                         try {
-                            Purchase.GetInstance().Consume(getSelectedProductId(), 111);
+                            PurchaseManager.GetInstance().Consume(getSelectedProductId(), 111);
                         } catch (Exception e) {
 
                         }
                         break;
                     case PURCHASE_RESTORE:
-                        Purchase.GetInstance().RestoreProduct(111);
+                        PurchaseManager.GetInstance().RestoreProduct(111);
                         break;
                     case PURCHASE_CONSUMEALL:
-                        Purchase.GetInstance().ConsumeAll(111);
+                        PurchaseManager.GetInstance().ConsumeAll(111);
                         break;
                     case FCM_NOTI_REGISTE:
                         break;
@@ -646,6 +652,7 @@ public class MainActivity extends Activity
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                             if (parent != null) {
                                 setSelectedProductId(parent.getItemAtPosition(position).toString());
+
 //                                Toast.makeText(itemView.getContext(), parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -660,7 +667,7 @@ public class MainActivity extends Activity
                 }
 
                 if (storeSpinner != null) {
-                    // Spinner에 어댑터 설정
+                    // storeSpinner 어댑터 설정
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(itemView.getContext(),
                             android.R.layout.simple_spinner_item, getstoreSpinnerItems());
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -674,6 +681,7 @@ public class MainActivity extends Activity
                                 String selectedStore = parent.getItemAtPosition(position).toString();
                                 setSelectedStore(selectedStore);
                                 updateProductSpinner(selectedStore);
+                                PurchaseManager.GetInstance().setStoreType(UserAction.stringToStoreList(selectedStore));
                                 //Toast.makeText(itemView.getContext(), parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
                             }
                         }
