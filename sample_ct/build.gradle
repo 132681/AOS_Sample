@@ -11,7 +11,7 @@ buildscript {
 
     dependencies {
 //        classpath 'com.android.tools.build:gradle:3.5.3'
-        classpath 'com.android.tools.build:gradle:4.0.2'
+        classpath 'com.android.tools.build:gradle:7.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -22,8 +22,8 @@ allprojects {
     repositories {
         google()
         jcenter()
+        //maven { url 'https://repo.onestore.net/repository/onestore-sdk-public' }
         flatDir {
-//            dirs = ['D:/Project/SyncPay/Plugins/NTSDK/LGBase/Source/ThirdParty/Release_1.0.1/lib/Android', 'D:\\Project\\SyncPay\\Plugins\\NTSDK\\NTUMG\\Source\\ThirdParty\\Android']
             dirs = ['D:/Git/UE/avoid/Plugins/NTSDK/NTBase/Source/ThirdParty/Release_2.0.0/lib/Android']
         }
     }

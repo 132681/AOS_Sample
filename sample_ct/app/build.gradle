@@ -19,11 +19,11 @@ android {
         jniLibs.srcDirs = [ 'src/main/jniLibs', "D:\\Git\\UE\\UE426\\Plugins\\NTSDK\\LGBase\\Source\\ThirdParty\\Release_2.0.0\\lib\\Android\\libs" ]
     }
 
-    compileSdkVersion 33
+    compileSdkVersion 34
     defaultConfig {
         applicationId 'com.linegames.ct2'
         minSdkVersion 23
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -52,11 +52,12 @@ android {
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
+            version "3.10.2"
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     productFlavors {
     }
@@ -87,7 +88,7 @@ dependencies {
     implementation 'com.linecorp.linesdk:linesdk:5.3.1'    //line
     implementation(name: 'lgbase-release', ext: 'aar')
 //    implementation(name: 'ntpermission-notice-release', ext: 'aar')
-    implementation 'com.android.billingclient:billing:6.0.1' //google billing
+    implementation 'com.android.billingclient:billing:7.0.0' //google billing
 //    implementation 'com.android.billingclient:billing-ktx:2.2.0' //google billing
 
 //    implementation 'androidx.viewpager2:viewpager2:1.0.0'
@@ -113,6 +114,11 @@ dependencies {
 //
 //    implementation 'com.google.firebase:firebase-messaging-directboot:22.0.0'
     //test
+//    def iap_lastest_version = "21.xx.xx"
+//    implementation "com.onestorecorp.sdk:sdk-iap:$iap_lastest_version"
+    //oneStore
+
+    //
     implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar'], exclude: []) //save object
 }
 
